@@ -26,10 +26,9 @@
 package es.lcssl.games.ms;
 
 import java.beans.PropertyChangeEvent;
-import javax.swing.JLabel;
-
 import java.beans.PropertyChangeListener;
 import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.border.BevelBorder;
 
 /**
@@ -37,16 +36,16 @@ import javax.swing.border.BevelBorder;
  * @author lcu
  */
 public class ValueField extends JLabel implements PropertyChangeListener {
-        
-    public ValueField(String name) {
-        setBorder(BorderFactory.createTitledBorder(
+
+    public ValueField( String name ) {
+        setBorder( BorderFactory.createTitledBorder(
                 BorderFactory.createBevelBorder(
-                        BevelBorder.LOWERED), name));
+                        BevelBorder.LOWERED ), name ) );
     }
-    
+
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        setText(String.format("%05d", evt.getNewValue()));
+    public void propertyChange( PropertyChangeEvent evt ) {
+        setText( String.format( "%05d cells to go.", evt.getNewValue() ) );
     }
 }

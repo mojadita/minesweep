@@ -25,55 +25,71 @@
  */
 package es.lcssl.games.ms;
 
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeListener;
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
-import static java.lang.String.format;
+
 
 /**
  *
  * @author lcu
  */
 public class Main {
-    
+
     public static void main( String[] args ) {
         int rows = Ms.DEFAULT_ROWS, cols = Ms.DEFAULT_COLS;
         double prob = Ms.DEFAULT_PROB;
-        for (int i = 0; i < args.length; i++) {
-            switch(args[i]) {
-                case "--rows": rows = Integer.parseInt(args[++i]); break;
-                case "--cols": cols = Integer.parseInt(args[++i]); break;
-                case "--prob": prob = Double.parseDouble(args[++i]); break;
-                default: System.err.println("Invalid parameter " + args[i]); break;
+        for ( int i = 0; i < args.length; i++ ) {
+            switch ( args[i] ) {
+            case "--rows": rows = Integer.parseInt( args[++i] );
+                break;
+            case "--cols": cols = Integer.parseInt( args[++i] );
+                break;
+            case "--prob": prob = Double.parseDouble( args[++i] );
+                break;
+            default: System.err.println( "Invalid parameter " + args[i] );
+                break;
             }
         }
         JFrame frame = new JFrame( Ms.class.getSimpleName() );
         Ms board = new Ms( rows, cols, prob );
-        JScrollPane sp = new JScrollPane(board);
+        JScrollPane sp = new JScrollPane( board );
         JMenuBar mb = new JMenuBar();
-        frame.setJMenuBar(mb);
-        JMenu file_menu = new JMenu("File");
-        file_menu.add(new AbstractAction("Quit") {
+        frame.setJMenuBar( mb );
+        JMenu file_menu = new JMenu( "File" );
+        file_menu.add( new AbstractAction( "Quit" ) {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                EventQueue.invokeLater(()->{System.exit(0);});
+            public void actionPerformed( ActionEvent e ) {
+                EventQueue.invokeLater( () -> {
+                    System.exit( 0 );
+                } );
             }
-        });
-        ValueField places_to_go = new ValueField("Places to go");
-        board.addPropertyChangeListener(Ms.PROPERTY_CELLS_TO_GO, places_to_go);
-        mb.add(file_menu);
-        mb.add(places_to_go);
+        } );
+        ValueField places_to_go = new ValueField( "Places to go" );
+        ValueField mines_to_guard = new ValueField( "Mines to guard" );
+        board.addPropertyChangeListener(
+                Ms.PROPERTY_CELLS_TO_GO, places_to_go );
+        board.addPropertyChangeListener(
+                Ms.PROPERTY_MINES, mines_to_guard );
+        mb.add( file_menu );
+        mb.add( places_to_go );
+        mb.add( mines_to_guard );
         frame.setContentPane( sp );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         frame.setSize( 320, 320 );
         frame.setVisible( true );
         System.out.println( board );
+        board.addPropertyChangeListener(
+                Ms.PROPERTY_CELLS_TO_GO,
+                ev -> {
+            if ( (int) ev.getNewValue() == 0 ) {
+                System.out.println( "Congratulations, YOU WON!!!" );
+                System.exit( 0 );
+            }
+        } );
     }
 }
