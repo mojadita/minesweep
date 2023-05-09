@@ -135,6 +135,7 @@ public class Ms extends JPanel {
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 final JButton b = new JButton();
+                b.setSize(16, 16);
                 b.setMargin(DEFAULT_BUTTON_INSETS);
                 b.setAction(new PushButtonAction(r, c, b));
                 b.setText(null);
@@ -193,15 +194,13 @@ public class Ms extends JPanel {
             b.setBorderPainted(false);
             if (cells[r][c] == MINE) {
                 /* hit a mine */
-                b.setBackground(Color.RED);
-                b.setForeground(Color.WHITE);
                 b.setIcon(exploded);
                 System.out.println("BOUMMMMMM!!!");
-                Ms.this.setEnabled(false);
+//                Ms.this.setEnabled(false);
 //                for (int r = 0; r < rows; r++)
 //                    for (int c = 0; c < cols; c++)
 //                        pbs[r][c].setEnabled(false);
-            } else if ((cells[r][c] & ALREADY_OPENED) == 0) {
+            } else if ((cells[r][c] & ALREADY_OPENED) == 0) { /* not already open */
                 /* not a mine and covered, uncover */
                 b.setBackground(bg[cells[r][c] & MINES_MASK]);
                 int old = cellsToGo--;
@@ -211,6 +210,8 @@ public class Ms extends JPanel {
                 if ((cells[r][c] & MINES_MASK) > 0) {
                     b.setText(format(
                             "%d", cells[r][c] & MINES_MASK));
+                    if ((cells[r][c] & MINES_MASK) >= 6)
+                        b.setForeground(Color.WHITE);
                 } else {
                     EventQueue.invokeLater(() -> {
                         uncoverNeighbor(r - 1, c - 1, e);

@@ -25,6 +25,7 @@
  */
 package es.lcssl.games.ms;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
@@ -44,14 +45,17 @@ public class Main {
     
     public static void main( String[] args ) {
         int rows = Ms.DEFAULT_ROWS, cols = Ms.DEFAULT_COLS;
+        double prob = Ms.DEFAULT_PROB;
         for (int i = 0; i < args.length; i++) {
             switch(args[i]) {
                 case "--rows": rows = Integer.parseInt(args[++i]); break;
                 case "--cols": cols = Integer.parseInt(args[++i]); break;
+                case "--prob": prob = Double.parseDouble(args[++i]); break;
+                default: System.err.println("Invalid parameter " + args[i]); break;
             }
         }
         JFrame frame = new JFrame( Ms.class.getSimpleName() );
-        Ms board = new Ms( rows, cols );
+        Ms board = new Ms( rows, cols, prob );
         JScrollPane sp = new JScrollPane(board);
         JMenuBar mb = new JMenuBar();
         frame.setJMenuBar(mb);
