@@ -196,6 +196,7 @@ public class Ms extends JPanel {
                 /* hit a mine */
                 b.setIcon(exploded);
                 System.out.println("BOUMMMMMM!!!");
+                b.setBackground(Color.red);
 //                Ms.this.setEnabled(false);
 //                for (int r = 0; r < rows; r++)
 //                    for (int c = 0; c < cols; c++)
