@@ -32,8 +32,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-
 
 /**
  *
@@ -41,67 +41,82 @@ import javax.swing.JScrollPane;
  */
 public class Main {
 
-    public static void main( String[] args ) {
+    public static void main(String[] args) {
         int rows = Ms.DEFAULT_ROWS, cols = Ms.DEFAULT_COLS;
         double prob = Ms.DEFAULT_PROB;
-        for ( int i = 0; i < args.length; i++ ) {
-            switch ( args[i] ) {
-            case "--rows": rows = Integer.parseInt( args[++i] );
-                break;
-            case "--cols": cols = Integer.parseInt( args[++i] );
-                break;
-            case "--prob": prob = Double.parseDouble( args[++i] );
-                break;
-            default: System.err.println( "Invalid parameter " + args[i] );
-                break;
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "--rows":
+                    rows = Integer.parseInt(args[++i]);
+                    break;
+                case "--cols":
+                    cols = Integer.parseInt(args[++i]);
+                    break;
+                case "--prob":
+                    prob = Double.parseDouble(args[++i]);
+                    break;
+                default:
+                    System.err.println("Invalid parameter " + args[i]);
+                    break;
             }
         }
-        JFrame frame = new JFrame( Ms.class.getSimpleName() );
-        Ms board = new Ms( rows, cols, prob );
-        JScrollPane sp = new JScrollPane( board );
+        JFrame frame = new JFrame(Ms.class.getSimpleName());
+        Ms board = new Ms(rows, cols, prob);
+        JScrollPane sp = new JScrollPane(board);
         JMenuBar mb = new JMenuBar();
-        frame.setJMenuBar( mb );
-        JMenu file_menu = new JMenu( "File" );
-        file_menu.add( new AbstractAction( "Quit" ) {
+        frame.setJMenuBar(mb);
+        JMenu file_menu = new JMenu("File");
+        file_menu.add(new AbstractAction("Re-Init") {
             @Override
-            public void actionPerformed( ActionEvent e ) {
-                EventQueue.invokeLater( () -> {
-                    System.exit( 0 );
-                } );
+            public void actionPerformed(ActionEvent e) {
+                EventQueue.invokeLater(() -> {
+                    board.init();
+                    board.validate();
+                });
             }
-        } );
-        final JDialog alert = new JDialog(frame, "Message");
-        ValueField places_to_go = new ValueField( 
-                "Places", board.getCellsToGo() );
-        ValueField mines_to_guard = new ValueField( 
-                "Mines to mark", board.getMinesToMark() );
+        });
+        file_menu.add(new AbstractAction("Quit") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                EventQueue.invokeLater(() -> {
+                    System.exit(0);
+                });
+            }
+        });
+        ValueField places_to_go = new ValueField(
+                "Cells", board.getCellsToGo());
+        ValueField mines_to_guard = new ValueField(
+                "Mines", board.getMinesToMark());
         board.addPropertyChangeListener(
-                Ms.PROPERTY_CELLS_TO_GO, places_to_go );
+                Ms.PROPERTY_CELLS_TO_GO, places_to_go);
         board.addPropertyChangeListener(
-                Ms.PROPERTY_MINES, mines_to_guard );
-        mb.add( file_menu );
-        mb.add( places_to_go );
-        mb.add( mines_to_guard );
-        frame.setContentPane( sp );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+                Ms.PROPERTY_MINES, mines_to_guard);
+        mb.add(file_menu);
+        mb.add(places_to_go);
+        mb.add(mines_to_guard);
+        frame.setContentPane(sp);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
-        frame.setVisible( true );
-        System.out.println( board );
+        frame.setVisible(true);
+        System.out.println(board);
         board.addPropertyChangeListener(Ms.PROPERTY_LOST, ev -> {
             if ((boolean) ev.getNewValue()) {
-                alert.setTitle("Error: GAME OVER!!");
-                alert.pack();
-                alert.setVisible(true);
+                JOptionPane.showMessageDialog(
+                        frame,
+                        "Oh!!  YOU EXPLODED\n",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
         board.addPropertyChangeListener(
-                Ms.PROPERTY_CELLS_TO_GO,
+                Ms.PROPERTY_WON,
                 ev -> {
-            if ( (int) ev.getNewValue() == 0 ) {
-                alert.setTitle("Congratulations: YOU WON!!!");
-                alert.pack();
-                alert.setVisible(true);
-            }
-        } );
+                    JOptionPane.showMessageDialog(
+                            frame,
+                            "Oh well well!!! You were smart and "
+                            + "you guessed all the mines",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
+                });
     }
 }

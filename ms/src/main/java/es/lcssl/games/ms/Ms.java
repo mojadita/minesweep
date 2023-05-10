@@ -63,6 +63,7 @@ public class Ms extends JPanel {
     public static final String PROPERTY_CELLS_TO_GO = "cellsToGo";
     public static final String PROPERTY_MINES = "mines";
     public static final String PROPERTY_LOST = "lost";
+    public static final String PROPERTY_WON = "won";
 
     public static final int PREFERRED_SIZE = 28;
 
@@ -95,21 +96,25 @@ public class Ms extends JPanel {
     }
 
     private final int rows, cols;
-    private final byte[][] cells;
+    private byte[][] cells;
     private final JButton[][] pushbuttonActionSupport;
     private final Random rnd = new Random();
     private int minesToMark;
     private int cellsToGo;
     private boolean lost = false;
+    private boolean won = false;
+    private double probability = DEFAULT_PROB;
 
     private PropertyChangeSupport propertyChangeSupport
             = new PropertyChangeSupport(this);
 
-    private void init(double prob) {
+    public void init() {
 
         int N = rows * cols,
-                n = (int) (N * prob + 0.5),
+                n = (int) (N * probability + 0.5),
                 array[] = new int[N];
+
+        cells = new byte[rows][cols];
 
         for (int i = 0; i < N; i++) {
             array[i] = i;
@@ -117,14 +122,18 @@ public class Ms extends JPanel {
         }
 
         for (int i = 0; i < n; i++) {
+            /* cell is a random, non selected yet cell */
             int cell = i + rnd.nextInt(N--);
             if (cell != i) {
+                /* exchange it with actual to exclude from next
+                 * selections */
                 int temp = array[i];
                 array[i] = array[cell];
                 array[cell] = temp;
             }
             cell = array[i];
 
+            /* extract row and column */
             int r = cell / cols,
                     c = cell % cols;
 
@@ -132,27 +141,34 @@ public class Ms extends JPanel {
             cells[r][c] = MINE;
 
             /* mark neighbor cells */
-            incrementSurroundingMinesOn(r - 1, c - 1);
-            incrementSurroundingMinesOn(r - 1, c);
-            incrementSurroundingMinesOn(r - 1, c + 1);
-            incrementSurroundingMinesOn(r, c - 1);
-            incrementSurroundingMinesOn(r, c + 1);
-            incrementSurroundingMinesOn(r + 1, c - 1);
-            incrementSurroundingMinesOn(r + 1, c);
-            incrementSurroundingMinesOn(r + 1, c + 1);
+            incrementSurroundingCellAt(r - 1, c - 1);
+            incrementSurroundingCellAt(r - 1, c);
+            incrementSurroundingCellAt(r - 1, c + 1);
+            incrementSurroundingCellAt(r, c - 1);
+            incrementSurroundingCellAt(r, c + 1);
+            incrementSurroundingCellAt(r + 1, c - 1);
+            incrementSurroundingCellAt(r + 1, c);
+            incrementSurroundingCellAt(r + 1, c + 1);
         }
-
-        /* create the pushbuttons */
+        /* init the pushbuttons */
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
-                final JButton b = new JButton();
-                b.setSize(16, 16);
-                b.setMargin(DEFAULT_BUTTON_INSETS);
-                b.setAction(new PushButtonAction(r, c, b));
+                JButton b = pushbuttonActionSupport[r][c];
+                /* if we don't still have the pushbutton, create it */
+                if (b == null) {
+                    b = pushbuttonActionSupport[r][c] = new JButton();
+                    /* and add to this panel */
+                    add(b);
+                    /* create and sect the action associated to the button */
+                    b.setAction(new PushButtonAction(r, c, b));
+                    b.setMargin(DEFAULT_BUTTON_INSETS);
+                }
+                /* set/reset the button */
                 b.setText(null);
                 b.setIcon(null);
-                add(b);
-                pushbuttonActionSupport[r][c] = b;
+                b.setBackground(null);
+                b.setForeground(null);
+                b.setBorderPainted(true);
             }
         }
         pushbuttonActionSupport[0][0].setPreferredSize(
@@ -160,6 +176,7 @@ public class Ms extends JPanel {
 
         minesToMark = n;
         cellsToGo = N;
+        lost = false;
     }
 
     public Ms(int rows, int cols, double prob) {
@@ -169,7 +186,7 @@ public class Ms extends JPanel {
         this.cols = cols;
         cells = new byte[rows][cols];
         pushbuttonActionSupport = new JButton[rows][cols];
-        init(prob);
+        init();
     }
 
     public Ms(int rows, int cols) {
@@ -214,6 +231,10 @@ public class Ms extends JPanel {
             System.out.println(
                     format("Button@(%d, %d) pressed\n", r, c));
 
+            if (lost || won) {
+                System.out.println("already finished, reinit");
+                return;
+            }
             byte cell_value = cells[r][c];
             if ((cell_value & ALREADY_OPENED) != 0) {
                 System.out.println("already opened");
@@ -242,6 +263,15 @@ public class Ms extends JPanel {
             propertyChangeSupport
                     .firePropertyChange(PROPERTY_CELLS_TO_GO,
                             old, cellsToGo);
+            
+            if (cellsToGo == 0 && !won) {
+                won = true;
+                propertyChangeSupport
+                        .firePropertyChange(PROPERTY_WON, 
+                                false, true );
+                return;
+            }
+            
             cells[r][c] |= ALREADY_OPENED;
             if (surrounding > 0) {
                 b.setText(format("%d", surrounding));
@@ -279,7 +309,7 @@ public class Ms extends JPanel {
                 property, listener);
     }
 
-    private void incrementSurroundingMinesOn(int r, int c) {
+    private void incrementSurroundingCellAt(int r, int c) {
         if (isCellInBoard(r, c) && cells[r][c] != MINE) {
             cells[r][c]++;
         }
