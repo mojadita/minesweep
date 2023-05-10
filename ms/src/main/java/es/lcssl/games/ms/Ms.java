@@ -103,9 +103,8 @@ public class Ms extends JPanel {
     private int cellsToGo;
     private boolean lost = false;
     private boolean won = false;
-    private double probability = DEFAULT_PROB;
-
-    private PropertyChangeSupport propertyChangeSupport
+    private final double probability = DEFAULT_PROB;
+    private final PropertyChangeSupport propertyChangeSupport
             = new PropertyChangeSupport(this);
 
     public void init() {
@@ -177,6 +176,9 @@ public class Ms extends JPanel {
         minesToMark = n;
         cellsToGo = N;
         lost = false;
+        won = false;
+        firePropertyChange(PROPERTY_CELLS_TO_GO, 0, cellsToGo);
+        firePropertyChange(PROPERTY_MINES, 0, minesToMark);
     }
 
     public Ms(int rows, int cols, double prob) {
