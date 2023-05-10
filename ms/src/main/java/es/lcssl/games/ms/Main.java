@@ -28,6 +28,7 @@ package es.lcssl.games.ms;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -69,8 +70,11 @@ public class Main {
                 } );
             }
         } );
-        ValueField places_to_go = new ValueField( "Places to go" );
-        ValueField mines_to_guard = new ValueField( "Mines to guard" );
+        final JDialog alert = new JDialog(frame, "Message");
+        ValueField places_to_go = new ValueField( 
+                "Places", board.getCellsToGo() );
+        ValueField mines_to_guard = new ValueField( 
+                "Mines to mark", board.getMinesToMark() );
         board.addPropertyChangeListener(
                 Ms.PROPERTY_CELLS_TO_GO, places_to_go );
         board.addPropertyChangeListener(
@@ -80,15 +84,23 @@ public class Main {
         mb.add( mines_to_guard );
         frame.setContentPane( sp );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        frame.setSize( 320, 320 );
+        frame.pack();
         frame.setVisible( true );
         System.out.println( board );
+        board.addPropertyChangeListener(Ms.PROPERTY_LOST, ev -> {
+            if ((boolean) ev.getNewValue()) {
+                alert.setTitle("Error: GAME OVER!!");
+                alert.pack();
+                alert.setVisible(true);
+            }
+        });
         board.addPropertyChangeListener(
                 Ms.PROPERTY_CELLS_TO_GO,
                 ev -> {
             if ( (int) ev.getNewValue() == 0 ) {
-                System.out.println( "Congratulations, YOU WON!!!" );
-                System.exit( 0 );
+                alert.setTitle("Congratulations: YOU WON!!!");
+                alert.pack();
+                alert.setVisible(true);
             }
         } );
     }

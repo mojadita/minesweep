@@ -36,16 +36,18 @@ import javax.swing.border.BevelBorder;
  * @author lcu
  */
 public class ValueField extends JLabel implements PropertyChangeListener {
+    public static final String FORMAT = "%05d";
 
-    public ValueField( String name ) {
+    public ValueField( String name, int initial ) {
         setBorder( BorderFactory.createTitledBorder(
                 BorderFactory.createBevelBorder(
                         BevelBorder.LOWERED ), name ) );
+        setText(String.format(FORMAT, initial));
     }
 
 
     @Override
     public void propertyChange( PropertyChangeEvent evt ) {
-        setText( String.format( "%05d cells to go.", evt.getNewValue() ) );
+        setText( String.format( FORMAT, evt.getNewValue() ) );
     }
 }
