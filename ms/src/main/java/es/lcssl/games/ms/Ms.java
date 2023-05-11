@@ -34,6 +34,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import static java.lang.String.format;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,8 +43,6 @@ import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-
-import static java.lang.String.format;
 
 /**
  * Minesweeper game panel.
@@ -54,6 +53,7 @@ public class Ms extends JPanel {
 
     public static final byte MINE = (byte) 0x80;
     public static final byte ALREADY_OPENED = 0x40;
+    public static final byte MARK_MASK = 0x20;
     public static final byte MINES_MASK = 0x0f;
     public static final double DEFAULT_PROB = 0.12;
 
@@ -69,6 +69,8 @@ public class Ms extends JPanel {
 
     public static final Insets DEFAULT_BUTTON_INSETS
             = new Insets(1, 1, 1, 1);
+
+    public static final int DEFAULT_MULTICLICK_MINIMUM_DELAY = 150;
 
     public static final Color bg[] = {
         Color.WHITE, Color.CYAN, Color.GREEN, Color.YELLOW,
@@ -161,6 +163,8 @@ public class Ms extends JPanel {
                     /* create and sect the action associated to the button */
                     b.setAction(new PushButtonAction(r, c, b));
                     b.setMargin(DEFAULT_BUTTON_INSETS);
+                    b.setMultiClickThreshhold(
+                            DEFAULT_MULTICLICK_MINIMUM_DELAY);
                 }
                 /* set/reset the button */
                 b.setText(null);
@@ -227,19 +231,69 @@ public class Ms extends JPanel {
             }
         }
 
+        private boolean isMarked(int r, int c) {
+            return isCellInBoard(r, c) && (cells[r][c] & MARK_MASK) != 0;
+        }
+
         @Override
         public void actionPerformed(ActionEvent e) {
 
             System.out.println(
-                    format("Button@(%d, %d) pressed\n", r, c));
+                    format("Button@(%d, %d) pressed (action command = %s,"
+                            + " modifiers = 0x%02x)\n",
+                            r, c, e.getActionCommand(),
+                            e.getModifiers()));
 
             if (lost || won) {
-                System.out.println("already finished, reinit");
+                /* finished game */
+                System.out.println("already finished, reinit game");
                 return;
             }
+
             byte cell_value = cells[r][c];
             if ((cell_value & ALREADY_OPENED) != 0) {
+                /* already open */
+                int marked = 0;
+                if (isMarked(r - 1, c - 1)) marked++;
+                if (isMarked(r - 1, c)) marked++;
+                if (isMarked(r - 1, c + 1)) marked++;
+                if (isMarked(r, c - 1)) marked++;
+                if (isMarked(r, c + 1)) marked++;
+                if (isMarked(r + 1, c - 1)) marked++;
+                if (isMarked(r + 1, c)) marked++;
+                if (isMarked(r + 1, c + 1)) marked++;
+                if (marked == (cells[r][c] & MINES_MASK)) {
+                    EventQueue.invokeLater(() -> {
+                        ActionEvent e2 = new ActionEvent(
+                                this, 
+                                ActionEvent.ACTION_PERFORMED, 
+                                "openFlagged");
+                        if (!isMarked(r - 1, c - 1)) uncoverNeighbor(r - 1, c - 1, e2);
+                        if (!isMarked(r - 1, c)) uncoverNeighbor(r - 1, c, e2);
+                        if (!isMarked(r - 1, c + 1)) uncoverNeighbor(r - 1, c + 1, e2);
+                        if (!isMarked(r, c - 1)) uncoverNeighbor(r, c - 1, e2);
+                        if (!isMarked(r, c + 1)) uncoverNeighbor(r, c + 1, e2);
+                        if (!isMarked(r + 1, c - 1)) uncoverNeighbor(r + 1, c - 1, e2);
+                        if (!isMarked(r + 1, c)) uncoverNeighbor(r + 1, c, e2);
+                        if (!isMarked(r + 1, c + 1)) uncoverNeighbor(r + 1, c + 1, e2);
+                    });
+                }
                 System.out.println("already opened");
+                return;
+            }
+
+            if ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
+                int cell = cells[r][c] ^= MARK_MASK;
+                pushbuttonActionSupport[r][c].setIcon(
+                        (cell & MARK_MASK) != 0
+                                ? flagged
+                                : null);
+                int old_val = minesToMark;
+                minesToMark += (cell & MARK_MASK) != 0
+                        ? -1
+                        : +1;
+                firePropertyChange(PROPERTY_MINES, 
+                        old_val, minesToMark);
                 return;
             }
 
@@ -265,15 +319,15 @@ public class Ms extends JPanel {
             propertyChangeSupport
                     .firePropertyChange(PROPERTY_CELLS_TO_GO,
                             old, cellsToGo);
-            
+
             if (cellsToGo == 0 && !won) {
                 won = true;
                 propertyChangeSupport
-                        .firePropertyChange(PROPERTY_WON, 
-                                false, true );
+                        .firePropertyChange(PROPERTY_WON,
+                                false, true);
                 return;
             }
-            
+
             cells[r][c] |= ALREADY_OPENED;
             if (surrounding > 0) {
                 b.setText(format("%d", surrounding));
