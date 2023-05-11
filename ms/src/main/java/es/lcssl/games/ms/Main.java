@@ -33,6 +33,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 
 /**
  * Main class providing a frame and using the {@link Ms} widget to play
@@ -108,6 +109,7 @@ public class Main {
 
         /* build the menu */
         mb.add( file_menu );
+        mb.add( new JSeparator( JSeparator.VERTICAL ) );
         mb.add( places_to_go );
         mb.add( mines_to_guard );
         frame.setContentPane( sp );

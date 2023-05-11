@@ -36,13 +36,14 @@ import javax.swing.border.BevelBorder;
  * @author lcu
  */
 public class ValueField extends JLabel implements PropertyChangeListener {
-    public static final String FORMAT = "%05d";
+
+    public static final String FORMAT = "*** %05d ***";
 
     public ValueField( String name, int initial ) {
         setBorder( BorderFactory.createTitledBorder(
                 BorderFactory.createBevelBorder(
                         BevelBorder.LOWERED ), name ) );
-        setText(String.format(FORMAT, initial));
+        setText( String.format( FORMAT, initial ) );
     }
 
 
