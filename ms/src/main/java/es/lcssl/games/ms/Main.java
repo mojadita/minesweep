@@ -120,15 +120,17 @@ public class Main {
 //        System.out.println(board);
 
         /* register a loser callback */
-        board.addPropertyChangeListener( Ms.PROPERTY_LOST, ev -> {
-                                     if ( (boolean) ev.getNewValue() ) {
-                                         JOptionPane.showMessageDialog(
-                                                 frame,
-                                                 "Oh!!  YOU EXPLODED on a strong maser blast!\n",
-                                                 "Error message",
-                                                 JOptionPane.ERROR_MESSAGE );
-                                     }
-                                 } );
+        board.addPropertyChangeListener(
+                Ms.PROPERTY_LOST, ev -> {
+            if ( (boolean) ev.getNewValue() ) {
+                JOptionPane.showMessageDialog(
+                        frame,
+                        "Oh!!  YOU EXPLODED on a "
+                        + "strong maser blast!\n",
+                        "Error message",
+                        JOptionPane.ERROR_MESSAGE );
+            }
+        } );
 
         /* ... and a winner callback */
         board.addPropertyChangeListener(
