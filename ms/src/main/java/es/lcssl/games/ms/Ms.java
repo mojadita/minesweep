@@ -238,12 +238,6 @@ public class Ms extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
 
-            System.out.println(
-                    format("Button@(%d, %d) pressed (action command = %s,"
-                            + " modifiers = 0x%02x)\n",
-                            r, c, e.getActionCommand(),
-                            e.getModifiers()));
-
             if (lost || won) {
                 /* finished game */
                 System.out.println("already finished, reinit game");
@@ -251,65 +245,73 @@ public class Ms extends JPanel {
             }
 
             byte cell_value = cells[r][c];
+            
             if ((cell_value & ALREADY_OPENED) != 0) {
                 /* already open */
-                int marked = 0;
-                if (isMarked(r - 1, c - 1)) marked++;
-                if (isMarked(r - 1, c)) marked++;
-                if (isMarked(r - 1, c + 1)) marked++;
-                if (isMarked(r, c - 1)) marked++;
-                if (isMarked(r, c + 1)) marked++;
-                if (isMarked(r + 1, c - 1)) marked++;
-                if (isMarked(r + 1, c)) marked++;
-                if (isMarked(r + 1, c + 1)) marked++;
-                if (marked == (cells[r][c] & MINES_MASK)) {
-                    EventQueue.invokeLater(() -> {
-                        ActionEvent e2 = new ActionEvent(
-                                this, 
-                                ActionEvent.ACTION_PERFORMED, 
-                                "openFlagged");
-                        if (!isMarked(r - 1, c - 1)) uncoverNeighbor(r - 1, c - 1, e2);
-                        if (!isMarked(r - 1, c)) uncoverNeighbor(r - 1, c, e2);
-                        if (!isMarked(r - 1, c + 1)) uncoverNeighbor(r - 1, c + 1, e2);
-                        if (!isMarked(r, c - 1)) uncoverNeighbor(r, c - 1, e2);
-                        if (!isMarked(r, c + 1)) uncoverNeighbor(r, c + 1, e2);
-                        if (!isMarked(r + 1, c - 1)) uncoverNeighbor(r + 1, c - 1, e2);
-                        if (!isMarked(r + 1, c)) uncoverNeighbor(r + 1, c, e2);
-                        if (!isMarked(r + 1, c + 1)) uncoverNeighbor(r + 1, c + 1, e2);
-                    });
+                if ((cell_value & MINES_MASK) > 0) {
+                    int marked = 0;
+                    if (isMarked(r - 1, c - 1)) marked++;
+                    if (isMarked(r - 1, c))     marked++;
+                    if (isMarked(r - 1, c + 1)) marked++;
+                    if (isMarked(r, c - 1))     marked++;
+                    if (isMarked(r, c + 1))     marked++;
+                    if (isMarked(r + 1, c - 1)) marked++;
+                    if (isMarked(r + 1, c))     marked++;
+                    if (isMarked(r + 1, c + 1)) marked++;
+                    if (marked == (cell_value & MINES_MASK)) {
+                        EventQueue.invokeLater(() -> {
+                            /* change the ActionEvent into an appropiate one */
+                            ActionEvent e2 = new ActionEvent(
+                                    this, 
+                                    ActionEvent.ACTION_PERFORMED, 
+                                    "openFlagged");
+                            if (!isMarked(r - 1, c - 1)) uncoverNeighbor(r - 1, c - 1, e2);
+                            if (!isMarked(r - 1, c))     uncoverNeighbor(r - 1, c, e2);
+                            if (!isMarked(r - 1, c + 1)) uncoverNeighbor(r - 1, c + 1, e2);
+                            if (!isMarked(r, c - 1))     uncoverNeighbor(r, c - 1, e2);
+                            if (!isMarked(r, c + 1))     uncoverNeighbor(r, c + 1, e2);
+                            if (!isMarked(r + 1, c - 1)) uncoverNeighbor(r + 1, c - 1, e2);
+                            if (!isMarked(r + 1, c))     uncoverNeighbor(r + 1, c, e2);
+                            if (!isMarked(r + 1, c + 1)) uncoverNeighbor(r + 1, c + 1, e2);
+                        });
+                    }
+                    return;
                 }
                 System.out.println("already opened");
                 return;
             }
 
             if ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
-                int cell = cells[r][c] ^= MARK_MASK;
+                /* switch marked mine */
+                cells[r][c] ^= MARK_MASK;
                 pushbuttonActionSupport[r][c].setIcon(
-                        (cell & MARK_MASK) != 0
+                        (cell_value & MARK_MASK) == 0
                                 ? flagged
                                 : null);
                 int old_val = minesToMark;
-                minesToMark += (cell & MARK_MASK) != 0
+                minesToMark += (cell_value & MARK_MASK) == 0
                         ? -1
                         : +1;
-                firePropertyChange(PROPERTY_MINES, 
-                        old_val, minesToMark);
+                propertyChangeSupport
+                        .firePropertyChange(
+                                PROPERTY_MINES,
+                                old_val, minesToMark);
                 return;
             }
 
             b.setBorderPainted(false);
 
             if (cell_value == MINE) {
-                /* hit a mine */
+                /* We hit a mine */
                 b.setIcon(exploded);
                 b.setBackground(Color.red);
-                boolean old_lost = lost;
                 lost = true;
                 propertyChangeSupport
                         .firePropertyChange(PROPERTY_LOST,
-                                old_lost, lost);
+                                false, lost);
                 return;
             }
+            
             /* not already open
              * not a mine, and covered, uncover */
             int surrounding = cell_value & MINES_MASK;
