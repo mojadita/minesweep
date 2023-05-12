@@ -132,8 +132,7 @@ public class Main {
                     if ((boolean) ev.getNewValue()) {
                         JOptionPane.showMessageDialog(
                                 frame,
-                                intl.getString(
-                        intl.getString("OH!!  YOU EXPLODED ON A STRONG MASER BLAST!")),
+                        intl.getString("OH!! YOU EXPLODED ON A STRONG MASER BLAST!!!"),
                         intl.getString("ERROR MESSAGE"),
                         JOptionPane.ERROR_MESSAGE 
                     
