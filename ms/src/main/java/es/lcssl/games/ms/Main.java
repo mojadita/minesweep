@@ -27,6 +27,9 @@ package es.lcssl.games.ms;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import static java.text.MessageFormat.format;
+import java.util.ResourceBundle;
+import static java.util.ResourceBundle.getBundle;
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -36,113 +39,118 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 
 /**
- * Main class providing a frame and using the {@link Ms} widget to play
- * mine hunting.
+ * Main class providing a frame and using the {@link Ms} widget to play mine
+ * hunting.
  *
  * @author lcu
  */
 public class Main {
 
-    public static void main( String[] args ) {
+    private static final ResourceBundle intl = getBundle("es/lcssl/games/ms/Main");
+
+    public static void main(String[] args) {
         int rows = Ms.DEFAULT_ROWS, cols = Ms.DEFAULT_COLS;
         double prob = Ms.DEFAULT_PROB;
 
         /* process program arguments */
-        for ( int i = 0; i < args.length; i++ ) {
-            switch ( args[i] ) {
-            case "--rows":
-                rows = Integer.parseInt( args[++i] );
-                break;
-            case "--cols":
-                cols = Integer.parseInt( args[++i] );
-                break;
-            case "--prob":
-                prob = Double.parseDouble( args[++i] );
-                break;
-            default:
-                System.err.println( "Invalid parameter " + args[i] );
-                break;
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "--rows":
+                    rows = Integer.parseInt(args[++i]);
+                    break;
+                case "--cols":
+                    cols = Integer.parseInt(args[++i]);
+                    break;
+                case "--prob":
+                    prob = Double.parseDouble(args[++i]);
+                    break;
+                default:
+                    System.err.println(format(
+                            intl.getString("INVALID PARAMETER {0}"),
+                            args[i]));
+                    break;
             }
         }
 
-        JFrame frame = new JFrame( Ms.class.getSimpleName() );
-        Ms board = new Ms( rows, cols, prob );
+        JFrame frame = new JFrame(Ms.class.getSimpleName());
+        Ms board = new Ms(rows, cols, prob);
         /* this is the MineSweeper board */
-        JScrollPane sp = new JScrollPane( board );
+        JScrollPane sp = new JScrollPane(board);
         JMenuBar mb = new JMenuBar();
-        frame.setJMenuBar( mb );
-        JMenu file_menu = new JMenu( "File" );
+        frame.setJMenuBar(mb);
+        JMenu file_menu = new JMenu(intl.getString("FILE"));
 
         /* add a reset menu option */
-        file_menu.add( new AbstractAction( "Re-Init" ) {
+        file_menu.add(new AbstractAction(intl.getString("RE-INIT")) {
             @Override
-            public void actionPerformed( ActionEvent e ) {
-                EventQueue.invokeLater( () -> {
+            public void actionPerformed(ActionEvent e) {
+                EventQueue.invokeLater(() -> {
                     board.init();
                     board.validate();
-                } );
+                });
             }
-        } );
+        });
 
         /* Add a quit button */
-        file_menu.add( new AbstractAction( "Quit" ) {
+        file_menu.add(new AbstractAction(intl.getString("QUIT")) {
             @Override
-            public void actionPerformed( ActionEvent e ) {
-                EventQueue.invokeLater( () -> {
-                    System.exit( 0 );
-                } );
+            public void actionPerformed(ActionEvent e) {
+                EventQueue.invokeLater(() -> {
+                    System.exit(0);
+                });
             }
-        } );
+        });
 
         /* These {@link ValueField}s show the cells to go and
          * mines to go values.
          */
         ValueField places_to_go = new ValueField(
-                "Cells", board.getCellsToGo() );
+                intl.getString("CELLS"), board.getCellsToGo());
         board.addPropertyChangeListener(
-                Ms.PROPERTY_CELLS_TO_GO, places_to_go );
+                Ms.PROPERTY_CELLS_TO_GO, places_to_go);
 
         ValueField mines_to_guard = new ValueField(
-                "Mines", board.getMinesToMark() );
+                intl.getString("MINES"), board.getMinesToMark());
         board.addPropertyChangeListener(
-                Ms.PROPERTY_MINES, mines_to_guard );
+                Ms.PROPERTY_MINES, mines_to_guard);
 
         /* build the menu */
-        mb.add( file_menu );
-        mb.add( new JSeparator( JSeparator.VERTICAL ) );
-        mb.add( places_to_go );
-        mb.add( mines_to_guard );
-        frame.setContentPane( sp );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        mb.add(file_menu);
+        mb.add(new JSeparator(JSeparator.VERTICAL));
+        mb.add(places_to_go);
+        mb.add(mines_to_guard);
+        frame.setContentPane(sp);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
-        frame.setVisible( true );
+        frame.setVisible(true);
 
 //        System.out.println(board);
 
         /* register a loser callback */
         board.addPropertyChangeListener(
                 Ms.PROPERTY_LOST, ev -> {
-            if ( (boolean) ev.getNewValue() ) {
-                JOptionPane.showMessageDialog(
-                        frame,
-                        "Oh!!  YOU EXPLODED on a "
-                        + "strong maser blast!\n",
-                        "Error message",
-                        JOptionPane.ERROR_MESSAGE );
-            }
+                    if ((boolean) ev.getNewValue()) {
+                        JOptionPane.showMessageDialog(
+                                frame,
+                                intl.getString(
+                        intl.getString("OH!!  YOU EXPLODED ON A STRONG MASER BLAST!")),
+                        intl.getString("ERROR MESSAGE"),
+                        JOptionPane.ERROR_MESSAGE 
+                    
+                );
+        }
         } );
 
         /* ... and a winner callback */
         board.addPropertyChangeListener(
                 Ms.PROPERTY_WON,
                 ev -> {
-            JOptionPane.showMessageDialog(
-                    frame,
-                    "Oh, well well!!! You were smart and "
-                    + "you guessed all the mines",
-                    "Success message",
-                    JOptionPane.INFORMATION_MESSAGE );
-        } );
+                    JOptionPane.showMessageDialog(
+                            frame,
+                            intl.getString("OH, WELL WELL!!! YOU WERE SMART AND YOU GUESSED ALL THE MINES"),
+                            intl.getString("SUCCESS MESSAGE"),
+                            JOptionPane.INFORMATION_MESSAGE);
+                });
         /* and let the wheel roll... */
     }
 }

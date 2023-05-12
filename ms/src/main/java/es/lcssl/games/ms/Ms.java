@@ -34,7 +34,9 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import static java.lang.String.format;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -42,8 +44,6 @@ import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-
-import static java.lang.String.format;
 
 /**
  * Minesweeper game panel. This has to be divided in two classes:
@@ -78,23 +78,25 @@ public class Ms extends JPanel {
         Color.ORANGE, Color.PINK, Color.MAGENTA, Color.RED,
         Color.DARK_GRAY };
 
+    private static ResourceBundle intl;
     private static ImageIcon flagged;
     private static ImageIcon exploded;
 
     static {
         /* class initialization code, load the icons */
         try {
+            intl = ResourceBundle.getBundle("es/lcssl/games/ms/Ms");
             ClassLoader cl = Ms.class.getClassLoader();
             flagged = new ImageIcon(
                     ImageIO.read( cl.getResourceAsStream(
-                            "flagged.png" ) ) );
+                            "flagged.png") ) );
             exploded = new ImageIcon(
                     ImageIO.read( cl.getResourceAsStream(
-                            "exploded.png" ) ) );
+                            "exploded.png") ) );
         } catch ( IOException | IllegalArgumentException ex ) {
             Logger.getLogger( Ms.class.getName() )
                     .log( Level.SEVERE,
-                          "Cannot read resources 'flagged' &| 'exploded'",
+                          intl.getString("CANNOT READ RESOURCES 'FLAGGED' &| 'EXPLODED'"),
                           ex );
         }
     }
@@ -241,7 +243,7 @@ public class Ms extends JPanel {
 
             if ( lost || won ) {
                 /* finished game */
-                System.out.println( "already finished, reinit game" );
+                System.err.println( intl.getString("ALREADY FINISHED, REINIT GAME") );
                 return;
             }
 
@@ -265,7 +267,7 @@ public class Ms extends JPanel {
                             ActionEvent e2 = new ActionEvent(
                                     this,
                                     ActionEvent.ACTION_PERFORMED,
-                                    "openFlagged" );
+                                    "openflagged");
                             if ( !isMarked( r - 1, c - 1 ) )
                                 uncover( r - 1, c - 1, e2 );
                             if ( !isMarked( r - 1, c ) )
@@ -286,7 +288,7 @@ public class Ms extends JPanel {
                     }
                     return;
                 }
-                System.out.println( "already opened" );
+                System.out.println( intl.getString("ALREADY OPENED") );
                 return;
             }
 
@@ -384,14 +386,6 @@ public class Ms extends JPanel {
         }
     }
 
-    private void line( StringBuilder sb, int cols ) {
-        sb.append( "+" );
-        for ( int c = 0; c < cols; c++ ) {
-            sb.append( "--" );
-        }
-        sb.append( "-+\n" );
-    }
-
     public int getMinesToMark() {
         return minesToMark;
     }
@@ -404,25 +398,33 @@ public class Ms extends JPanel {
         return lost;
     }
 
+    private void line( StringBuilder sb ) {
+        sb.append( "+" );
+        for ( int c = 0; c < cols; c++ ) {
+            sb.append( "--" );
+        }
+        sb.append( "-+\n" );
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        line( sb, cols );
+        line( sb );
         for ( int r = 0; r < rows; r++ ) {
             sb.append( "|" );
             for ( int c = 0; c < cols; c++ ) {
                 if ( cells[r][c] == MINE ) {
-                    sb.append( " @" );
+                    sb.append( " @");
                 } else if ( (cells[r][c] & MINES_MASK) == 0 ) {
                     sb.append( "  " );
                 } else {
-                    sb.append( format( " %d",
+                    sb.append( format(" %d", 
                                        cells[r][c] & MINES_MASK ) );
                 }
             }
             sb.append( " |\n" );
         }
-        line( sb, cols );
+        line( sb );
         return sb.toString();
     }
 }

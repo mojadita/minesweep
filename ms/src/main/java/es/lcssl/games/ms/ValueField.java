@@ -37,7 +37,7 @@ import javax.swing.border.BevelBorder;
  */
 public class ValueField extends JLabel implements PropertyChangeListener {
 
-    public static final String FORMAT = "*** %05d ***";
+    public static final String FORMAT = java.util.ResourceBundle.getBundle("es/lcssl/games/ms/ValueField").getString("*** %05D ***");
 
     public ValueField( String name, int initial ) {
         setBorder( BorderFactory.createTitledBorder(
