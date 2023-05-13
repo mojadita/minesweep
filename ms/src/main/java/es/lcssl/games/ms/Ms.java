@@ -34,7 +34,6 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
-import static java.lang.String.format;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -44,6 +43,8 @@ import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+
+import static java.text.MessageFormat.format;
 
 /**
  * Minesweeper game panel. This has to be divided in two classes:
@@ -55,6 +56,7 @@ import javax.swing.JPanel;
  *
  * @author lcu
  */
+
 public class Ms extends JPanel {
 
     public static final byte MINE = (byte) 0x80;
@@ -69,35 +71,36 @@ public class Ms extends JPanel {
     public static final String PROPERTY_LOST = "lost";
     public static final String PROPERTY_WON = "won";
     public static final int PREFERRED_SIZE = 28;
-
     public static final Insets DEFAULT_BUTTON_INSETS =
             new Insets( 1, 1, 1, 1 );
 
-    public static final Color bg[] = {
+    private static final Color bg[] = {
         Color.WHITE, Color.CYAN, Color.GREEN, Color.YELLOW,
         Color.ORANGE, Color.PINK, Color.MAGENTA, Color.RED,
         Color.DARK_GRAY };
-
     private static ResourceBundle intl;
     private static ImageIcon flagged;
     private static ImageIcon exploded;
+    private static Logger LOGGER = Logger
+            .getLogger( Ms.class.getSimpleName() );
 
     static {
         /* class initialization code, load the icons */
         try {
-            intl = ResourceBundle.getBundle("es/lcssl/games/ms/Ms");
+            intl = ResourceBundle.getBundle( "es/lcssl/games/ms/Ms" );
             ClassLoader cl = Ms.class.getClassLoader();
             flagged = new ImageIcon(
                     ImageIO.read( cl.getResourceAsStream(
-                            "flagged.png") ) );
+                            "flagged.png" ) ) );
             exploded = new ImageIcon(
                     ImageIO.read( cl.getResourceAsStream(
-                            "exploded.png") ) );
+                            "exploded.png" ) ) );
         } catch ( IOException | IllegalArgumentException ex ) {
-            Logger.getLogger( Ms.class.getName() )
-                    .log( Level.SEVERE,
-                          intl.getString("CANNOT READ RESOURCES 'FLAGGED' &| 'EXPLODED'"),
-                          ex );
+            LOGGER.log( Level.SEVERE,
+                        intl.getString(
+                                "CANNOT READ RESOURCES "
+                                + "'FLAGGED' &| 'EXPLODED'" ),
+                        ex );
         }
     }
 
@@ -243,7 +246,8 @@ public class Ms extends JPanel {
 
             if ( lost || won ) {
                 /* finished game */
-                System.err.println( intl.getString("ALREADY FINISHED, REINIT GAME") );
+                LOGGER.info( intl.getString(
+                        "ALREADY FINISHED, REINIT GAME" ) );
                 return;
             }
 
@@ -267,7 +271,7 @@ public class Ms extends JPanel {
                             ActionEvent e2 = new ActionEvent(
                                     this,
                                     ActionEvent.ACTION_PERFORMED,
-                                    "openflagged");
+                                    "openflagged" );
                             if ( !isMarked( r - 1, c - 1 ) )
                                 uncover( r - 1, c - 1, e2 );
                             if ( !isMarked( r - 1, c ) )
@@ -288,7 +292,9 @@ public class Ms extends JPanel {
                     }
                     return;
                 }
-                System.out.println( intl.getString("ALREADY OPENED") );
+                LOGGER.info(
+                        format( intl.getString( "ALREADY OPENED @({0}, {1})" ),
+                                r, c ) );
                 return;
             }
 
@@ -331,7 +337,7 @@ public class Ms extends JPanel {
                 b.setForeground( Color.WHITE );
             }
             if ( surrounding > 0 ) {
-                b.setText( format( "%d", surrounding ) );
+                b.setText( format( "{0}", surrounding ) );
             }
 
             int old = cellsToGo--;
@@ -414,11 +420,11 @@ public class Ms extends JPanel {
             sb.append( "|" );
             for ( int c = 0; c < cols; c++ ) {
                 if ( cells[r][c] == MINE ) {
-                    sb.append( " @");
+                    sb.append( " @" );
                 } else if ( (cells[r][c] & MINES_MASK) == 0 ) {
                     sb.append( "  " );
                 } else {
-                    sb.append( format(" %d", 
+                    sb.append( format( " {0}",
                                        cells[r][c] & MINES_MASK ) );
                 }
             }

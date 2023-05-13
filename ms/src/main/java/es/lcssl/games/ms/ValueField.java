@@ -31,24 +31,27 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.border.BevelBorder;
 
+import static java.text.MessageFormat.format;
+
 /**
  *
  * @author lcu
  */
 public class ValueField extends JLabel implements PropertyChangeListener {
 
-    public static final String FORMAT = java.util.ResourceBundle.getBundle("es/lcssl/games/ms/ValueField").getString("*** %05D ***");
+    public static final String FORMAT = java.util.ResourceBundle.getBundle(
+            "es/lcssl/games/ms/ValueField" ).getString( "*** {0} ***" );
 
     public ValueField( String name, int initial ) {
         setBorder( BorderFactory.createTitledBorder(
                 BorderFactory.createBevelBorder(
                         BevelBorder.LOWERED ), name ) );
-        setText( String.format( FORMAT, initial ) );
+        setText( format( FORMAT, initial ) );
     }
 
 
     @Override
     public void propertyChange( PropertyChangeEvent evt ) {
-        setText( String.format( FORMAT, evt.getNewValue() ) );
+        setText( format( FORMAT, evt.getNewValue() ) );
     }
 }

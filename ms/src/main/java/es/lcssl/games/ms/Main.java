@@ -27,9 +27,8 @@ package es.lcssl.games.ms;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-import static java.text.MessageFormat.format;
+import java.beans.PropertyChangeEvent;
 import java.util.ResourceBundle;
-import static java.util.ResourceBundle.getBundle;
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -37,6 +36,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+
+import static java.text.MessageFormat.format;
+import static java.util.ResourceBundle.getBundle;
 
 /**
  * Main class providing a frame and using the {@link Ms} widget to play mine
@@ -46,110 +48,123 @@ import javax.swing.JSeparator;
  */
 public class Main {
 
-    private static final ResourceBundle intl = getBundle("es/lcssl/games/ms/Main");
+    private static final ResourceBundle intl = getBundle(
+            "es/lcssl/games/ms/Main" );
 
-    public static void main(String[] args) {
+    public static void main( String[] args ) {
         int rows = Ms.DEFAULT_ROWS, cols = Ms.DEFAULT_COLS;
         double prob = Ms.DEFAULT_PROB;
 
         /* process program arguments */
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "--rows":
-                    rows = Integer.parseInt(args[++i]);
-                    break;
-                case "--cols":
-                    cols = Integer.parseInt(args[++i]);
-                    break;
-                case "--prob":
-                    prob = Double.parseDouble(args[++i]);
-                    break;
-                default:
-                    System.err.println(format(
-                            intl.getString("INVALID PARAMETER {0}"),
-                            args[i]));
-                    break;
+        for ( int i = 0; i < args.length; i++ ) {
+            switch ( args[i] ) {
+            case "--rows":
+                rows = Integer.parseInt( args[++i] );
+                break;
+            case "--cols":
+                cols = Integer.parseInt( args[++i] );
+                break;
+            case "--prob":
+                prob = Double.parseDouble( args[++i] );
+                break;
+            default:
+                System.err.println( format(
+                        intl.getString( "INVALID PARAMETER {0}" ),
+                        args[i] ) );
+                break;
             }
         }
 
-        JFrame frame = new JFrame(Ms.class.getSimpleName());
-        Ms board = new Ms(rows, cols, prob);
+        JFrame frame = new JFrame( Ms.class.getSimpleName() );
+        Ms board = new Ms( rows, cols, prob );
         /* this is the MineSweeper board */
-        JScrollPane sp = new JScrollPane(board);
+        JScrollPane sp = new JScrollPane( board );
         JMenuBar mb = new JMenuBar();
-        frame.setJMenuBar(mb);
-        JMenu file_menu = new JMenu(intl.getString("FILE"));
-
-        /* add a reset menu option */
-        file_menu.add(new AbstractAction(intl.getString("RE-INIT")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                EventQueue.invokeLater(() -> {
-                    board.init();
-                    board.validate();
-                });
-            }
-        });
-
-        /* Add a quit button */
-        file_menu.add(new AbstractAction(intl.getString("QUIT")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                EventQueue.invokeLater(() -> {
-                    System.exit(0);
-                });
-            }
-        });
+        frame.setJMenuBar( mb );
+        JMenu file_menu = new JMenu( intl.getString( "FILE" ) );
 
         /* These {@link ValueField}s show the cells to go and
          * mines to go values.
          */
         ValueField places_to_go = new ValueField(
-                intl.getString("CELLS"), board.getCellsToGo());
+                intl.getString( "CELLS" ), board.getCellsToGo() );
         board.addPropertyChangeListener(
-                Ms.PROPERTY_CELLS_TO_GO, places_to_go);
+                Ms.PROPERTY_CELLS_TO_GO, places_to_go );
 
         ValueField mines_to_guard = new ValueField(
-                intl.getString("MINES"), board.getMinesToMark());
+                intl.getString( "MINES" ), board.getMinesToMark() );
         board.addPropertyChangeListener(
-                Ms.PROPERTY_MINES, mines_to_guard);
+                Ms.PROPERTY_MINES, mines_to_guard );
+
+        /* add a reset menu option */
+        file_menu.add( new AbstractAction( intl.getString( "RE-INIT" ) ) {
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                EventQueue.invokeLater( () -> {
+                    board.init();
+                    places_to_go.propertyChange(
+                            new PropertyChangeEvent(
+                                    board,
+                                    Ms.PROPERTY_CELLS_TO_GO,
+                                    0, board.getCellsToGo() ) );
+                    mines_to_guard.propertyChange(
+                            new PropertyChangeEvent(
+                                    board,
+                                    Ms.PROPERTY_MINES,
+                                    0, board.getMinesToMark() ) );
+
+                    board.validate();
+                } );
+            }
+        } );
+
+        /* Add a quit button */
+        file_menu.add( new AbstractAction( intl.getString( "QUIT" ) ) {
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                EventQueue.invokeLater( () -> {
+                    System.exit( 0 );
+                } );
+            }
+        } );
 
         /* build the menu */
-        mb.add(file_menu);
-        mb.add(new JSeparator(JSeparator.VERTICAL));
-        mb.add(places_to_go);
-        mb.add(mines_to_guard);
-        frame.setContentPane(sp);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mb.add( file_menu );
+        mb.add( new JSeparator( JSeparator.VERTICAL ) );
+        mb.add( places_to_go );
+        mb.add( mines_to_guard );
+        frame.setContentPane( sp );
+        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         frame.pack();
-        frame.setVisible(true);
+        frame.setVisible( true );
 
 //        System.out.println(board);
 
         /* register a loser callback */
         board.addPropertyChangeListener(
                 Ms.PROPERTY_LOST, ev -> {
-                    if ((boolean) ev.getNewValue()) {
-                        JOptionPane.showMessageDialog(
-                                frame,
-                        intl.getString("OH!! YOU EXPLODED ON A STRONG MASER BLAST!!!"),
-                        intl.getString("ERROR MESSAGE"),
-                        JOptionPane.ERROR_MESSAGE 
-                    
+            if ( (boolean) ev.getNewValue() ) {
+                JOptionPane.showMessageDialog(
+                        frame,
+                        intl.getString(
+                                "OH!! YOU EXPLODED ON A STRONG MASER BLAST!!!" ),
+                        intl.getString( "ERROR MESSAGE" ),
+                        JOptionPane.ERROR_MESSAGE
                 );
-        }
+            }
         } );
 
         /* ... and a winner callback */
         board.addPropertyChangeListener(
                 Ms.PROPERTY_WON,
                 ev -> {
-                    JOptionPane.showMessageDialog(
-                            frame,
-                            intl.getString("OH, WELL WELL!!! YOU WERE SMART AND YOU GUESSED ALL THE MINES"),
-                            intl.getString("SUCCESS MESSAGE"),
-                            JOptionPane.INFORMATION_MESSAGE);
-                });
+            JOptionPane.showMessageDialog(
+                    frame,
+                    intl.getString(
+                            "OH, WELL WELL!!! YOU WERE SMART AND YOU GUESSED ALL THE MINES" ),
+                    intl.getString( "SUCCESS MESSAGE" ),
+                    JOptionPane.INFORMATION_MESSAGE );
+        } );
         /* and let the wheel roll... */
     }
 }
