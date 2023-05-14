@@ -64,8 +64,8 @@ public class Ms extends JPanel {
     public static final byte MARK_MASK = 0x20;
     public static final byte MINES_MASK = 0x0f;
     public static final double DEFAULT_PROB = 0.12;
-    public static final int DEFAULT_ROWS = 32;
-    public static final int DEFAULT_COLS = 32;
+    public static final int DEFAULT_ROWS = 16;
+    public static final int DEFAULT_COLS = 16;
     public static final String PROPERTY_CELLS_TO_GO = "cellsToGo";
     public static final String PROPERTY_MINES = "mines";
     public static final String PROPERTY_LOST = "lost";
@@ -81,6 +81,7 @@ public class Ms extends JPanel {
     private static ResourceBundle intl;
     private static ImageIcon flagged;
     private static ImageIcon exploded;
+    private static ImageIcon mine;
     private static Logger LOGGER = Logger
             .getLogger( Ms.class.getSimpleName() );
 
@@ -95,6 +96,9 @@ public class Ms extends JPanel {
             exploded = new ImageIcon(
                     ImageIO.read( cl.getResourceAsStream(
                             "exploded.png" ) ) );
+            mine = new ImageIcon(
+                    ImageIO.read( cl.getResourceAsStream(
+                            "mine.png" ) ) );
         } catch ( IOException | IllegalArgumentException ex ) {
             LOGGER.log( Level.SEVERE,
                         intl.getString(
@@ -323,6 +327,18 @@ public class Ms extends JPanel {
                 b.setIcon( exploded );
                 b.setBackground( Color.red );
                 lost = true;
+                for ( int r = 0; r < rows; r++ ) {
+                    for ( int c = 0; c < cols; c++ ) {
+                        final JButton to_change =
+                                pushbuttonActionSupport[r][c];
+                        if ( (cells[r][c] & MINE) != 0
+                                && to_change != b ) {
+                            EventQueue.invokeLater( () -> {
+                                to_change.setIcon( mine );
+                            } );
+                        }
+                    }
+                }
                 propertyChangeSupport
                         .firePropertyChange( PROPERTY_LOST,
                                              false, lost );
