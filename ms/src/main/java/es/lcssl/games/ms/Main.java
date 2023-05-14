@@ -75,7 +75,7 @@ public class Main {
             }
         }
 
-        JFrame frame = new JFrame( Ms.class.getSimpleName() );
+        JFrame frame = new JFrame( intl.getString( "TITLE" ) );
         Ms board = new Ms( rows, cols, prob );
         /* this is the MineSweeper board */
         JScrollPane sp = new JScrollPane( board );
