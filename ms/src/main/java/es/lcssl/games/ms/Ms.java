@@ -325,7 +325,7 @@ public class Ms extends JPanel {
             if ( cell_value == MINE ) {
                 /* We hit a mine */
                 b.setIcon( exploded );
-                b.setBackground( Color.red );
+                b.setBackground( Color.white );
                 lost = true;
                 for ( int r = 0; r < rows; r++ ) {
                     for ( int c = 0; c < cols; c++ ) {
