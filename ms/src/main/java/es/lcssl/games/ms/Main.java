@@ -28,7 +28,9 @@ package es.lcssl.games.ms;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
+import static java.text.MessageFormat.format;
 import java.util.ResourceBundle;
+import static java.util.ResourceBundle.getBundle;
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -36,9 +38,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-
-import static java.text.MessageFormat.format;
-import static java.util.ResourceBundle.getBundle;
 
 /**
  * Main class providing a frame and using the {@link Ms} widget to play mine
@@ -87,12 +86,16 @@ public class Main {
          * mines to go values.
          */
         ValueField places_to_go = new ValueField(
-                intl.getString( "CELLS" ), board.getCellsToGo() );
+                intl.getString( "CELLS" ),  
+                intl.getString("FORMAT_CELLS"), 
+                board.getCellsToGo() );
         board.addPropertyChangeListener(
                 Ms.PROPERTY_CELLS_TO_GO, places_to_go );
 
         ValueField mines_to_guard = new ValueField(
-                intl.getString( "MINES" ), board.getMinesToMark() );
+                intl.getString( "MINES" ), 
+                intl.getString("FORMAT_MINES"),
+                board.getMinesToMark() );
         board.addPropertyChangeListener(
                 Ms.PROPERTY_MINES, mines_to_guard );
 

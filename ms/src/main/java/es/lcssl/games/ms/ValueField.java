@@ -27,11 +27,10 @@ package es.lcssl.games.ms;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import static java.text.MessageFormat.format;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.border.BevelBorder;
-
-import static java.text.MessageFormat.format;
 
 /**
  *
@@ -39,19 +38,20 @@ import static java.text.MessageFormat.format;
  */
 public class ValueField extends JLabel implements PropertyChangeListener {
 
-    public static final String FORMAT = java.util.ResourceBundle.getBundle(
-            "es/lcssl/games/ms/ValueField" ).getString( "*** {0} ***" );
+    public final String format;
 
-    public ValueField( String name, int initial ) {
+    public ValueField( String name, String format, Object initial_value) {
+        super(name);
+        this.format = format;
         setBorder( BorderFactory.createTitledBorder(
                 BorderFactory.createBevelBorder(
                         BevelBorder.LOWERED ), name ) );
-        setText( format( FORMAT, initial ) );
+        setText(format(this.format, initial_value ) );
     }
 
 
     @Override
     public void propertyChange( PropertyChangeEvent evt ) {
-        setText( format( FORMAT, evt.getNewValue() ) );
+        setText(format(format, evt.getNewValue() ) );
     }
 }

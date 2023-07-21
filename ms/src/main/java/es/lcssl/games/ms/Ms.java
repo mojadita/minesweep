@@ -34,6 +34,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import static java.text.MessageFormat.format;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -43,8 +44,6 @@ import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-
-import static java.text.MessageFormat.format;
 
 /**
  * Minesweeper game panel. This has to be divided in two classes:
@@ -254,7 +253,7 @@ public class Ms extends JPanel {
                         "ALREADY FINISHED, REINIT GAME" ) );
                 return;
             }
-
+            
             byte cell_value = cells[r][c];
 
             if ( (cell_value & ALREADY_OPENED) != 0 ) {
@@ -302,7 +301,9 @@ public class Ms extends JPanel {
                 return;
             }
 
-            if ( (e.getModifiers() & ActionEvent.SHIFT_MASK) != 0 ) {
+            if ( (e.getModifiers() & ActionEvent.SHIFT_MASK) != 0
+                    || (cell_value & MARK_MASK) != 0)
+            {
                 /* switch marked mine */
                 cells[r][c] ^= MARK_MASK;
                 pushbuttonActionSupport[r][c].setIcon(
