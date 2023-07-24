@@ -28,9 +28,11 @@ package es.lcssl.games.ms;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import static java.text.MessageFormat.format;
 import java.util.ResourceBundle;
 import static java.util.ResourceBundle.getBundle;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -48,126 +50,180 @@ import javax.swing.JSeparator;
 public class Main {
 
     private static final ResourceBundle intl = getBundle(
-            "es/lcssl/games/ms/Main" );
+            "es/lcssl/games/ms/Main");
 
-    public static void main( String[] args ) {
+    public static void main(String[] args) {
         int rows = Ms.DEFAULT_ROWS, cols = Ms.DEFAULT_COLS;
         double prob = Ms.DEFAULT_PROB;
 
         /* process program arguments */
-        for ( int i = 0; i < args.length; i++ ) {
-            switch ( args[i] ) {
-            case "--rows":
-                rows = Integer.parseInt( args[++i] );
-                break;
-            case "--cols":
-                cols = Integer.parseInt( args[++i] );
-                break;
-            case "--prob":
-                prob = Double.parseDouble( args[++i] );
-                break;
-            default:
-                System.err.println( format(
-                        intl.getString( "INVALID PARAMETER {0}" ),
-                        args[i] ) );
-                break;
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "--rows":
+                    rows = Integer.parseInt(args[++i]);
+                    break;
+                case "--cols":
+                    cols = Integer.parseInt(args[++i]);
+                    break;
+                case "--prob":
+                    prob = Double.parseDouble(args[++i]);
+                    break;
+                default:
+                    System.err.println(format(
+                            intl.getString("INVALID PARAMETER {0}"),
+                            args[i]));
+                    break;
             }
         }
 
-        JFrame frame = new JFrame( intl.getString( "TITLE" ) );
-        Ms board = new Ms( rows, cols, prob );
+        JFrame frame = new JFrame(intl.getString("TITLE"));
+        Ms board = new Ms(rows, cols, prob);
         /* this is the MineSweeper board */
-        JScrollPane sp = new JScrollPane( board );
+        JScrollPane sp = new JScrollPane(board);
         JMenuBar mb = new JMenuBar();
-        frame.setJMenuBar( mb );
-        JMenu file_menu = new JMenu( intl.getString( "FILE" ) );
+        frame.setJMenuBar(mb);
+        JMenu file_menu = new JMenu(intl.getString("FILE"));
 
         /* These {@link ValueField}s show the cells to go and
          * mines to go values.
          */
         ValueField places_to_go = new ValueField(
-                intl.getString( "CELLS" ),  
-                intl.getString("FORMAT_CELLS"), 
-                board.getCellsToGo() );
+                intl.getString("CELLS"),
+                intl.getString("FORMAT_CELLS"),
+                board.getCellsToGo());
         board.addPropertyChangeListener(
-                Ms.PROPERTY_CELLS_TO_GO, places_to_go );
+                Ms.PROPERTY_CELLS_TO_GO, places_to_go);
 
         ValueField mines_to_guard = new ValueField(
-                intl.getString( "MINES" ), 
+                intl.getString("MINES"),
                 intl.getString("FORMAT_MINES"),
-                board.getMinesToMark() );
+                board.getMinesToMark());
         board.addPropertyChangeListener(
-                Ms.PROPERTY_MINES, mines_to_guard );
+                Ms.PROPERTY_MINES, mines_to_guard);
+        Chronograph chrono = new Chronograph();
+        ValueField time = new ValueField(
+                intl.getString("TIME"),
+                intl.getString("FORMAT_TIME"),
+                chrono);
+        chrono.addValueChangeListener(Chronograph.PROPERTY_TIMESTAMP, time);
+
 
         /* add a reset menu option */
-        file_menu.add( new AbstractAction( intl.getString( "RE-INIT" ) ) {
+        file_menu.add(new AbstractAction(intl.getString("RE-INIT")) {
             @Override
-            public void actionPerformed( ActionEvent e ) {
-                EventQueue.invokeLater( () -> {
+            public void actionPerformed(ActionEvent e) {
+                EventQueue.invokeLater(() -> {
                     board.init();
                     places_to_go.propertyChange(
                             new PropertyChangeEvent(
                                     board,
                                     Ms.PROPERTY_CELLS_TO_GO,
-                                    0, board.getCellsToGo() ) );
+                                    0, board.getCellsToGo()));
                     mines_to_guard.propertyChange(
                             new PropertyChangeEvent(
                                     board,
                                     Ms.PROPERTY_MINES,
-                                    0, board.getMinesToMark() ) );
+                                    0, board.getMinesToMark()));
 
                     board.validate();
-                } );
+                });
             }
-        } );
+        });
 
         /* Add a quit button */
-        file_menu.add( new AbstractAction( intl.getString( "QUIT" ) ) {
+        file_menu.add(new AbstractAction(intl.getString("QUIT")) {
             @Override
-            public void actionPerformed( ActionEvent e ) {
-                EventQueue.invokeLater( () -> {
-                    System.exit( 0 );
-                } );
+            public void actionPerformed(ActionEvent e) {
+                EventQueue.invokeLater(() -> {
+                    System.exit(0);
+                });
             }
-        } );
+        });
 
         /* build the menu */
-        mb.add( file_menu );
-        mb.add( new JSeparator( JSeparator.VERTICAL ) );
-        mb.add( places_to_go );
-        mb.add( mines_to_guard );
-        frame.setContentPane( sp );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        mb.add(file_menu);
+        mb.add(new JSeparator(JSeparator.VERTICAL));
+        mb.add(time);
+        mb.add(new JSeparator(JSeparator.VERTICAL));
+        mb.add(places_to_go);
+        mb.add(mines_to_guard);
+        frame.setContentPane(sp);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
-        frame.setVisible( true );
+        frame.setVisible(true);
 
 //        System.out.println(board);
 
         /* register a loser callback */
         board.addPropertyChangeListener(
                 Ms.PROPERTY_LOST, ev -> {
-            if ( (boolean) ev.getNewValue() ) {
-                JOptionPane.showMessageDialog(
-                        frame,
-                        intl.getString(
-                                "OH!! YOU EXPLODED ON A STRONG MASER BLAST!!!" ),
-                        intl.getString( "ERROR MESSAGE" ),
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }
-        } );
+                    if ((boolean) ev.getNewValue()) {
+                        JOptionPane.showMessageDialog(
+                                frame,
+                                intl.getString(
+                                        "OH!! YOU EXPLODED ON A STRONG MASER BLAST!!!"),
+                                intl.getString("ERROR MESSAGE"),
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                        chrono.stop();
+                    }
+                });
 
         /* ... and a winner callback */
         board.addPropertyChangeListener(
                 Ms.PROPERTY_WON,
                 ev -> {
-            JOptionPane.showMessageDialog(
-                    frame,
-                    intl.getString(
-                            "OH, WELL WELL!!! YOU WERE SMART AND YOU GUESSED ALL THE MINES" ),
-                    intl.getString( "SUCCESS MESSAGE" ),
-                    JOptionPane.INFORMATION_MESSAGE );
-        } );
-        /* and let the wheel roll... */
+                    JOptionPane.showMessageDialog(
+                            frame,
+                            intl.getString(
+                                    "OH, WELL WELL!!! YOU WERE SMART AND YOU GUESSED ALL THE MINES"),
+                            intl.getString("SUCCESS MESSAGE"),
+                            JOptionPane.INFORMATION_MESSAGE);
+                        chrono.stop();
+                });
+
+        /* ... timer set */
+        board.addPropertyChangeListener(
+                Ms.PROPERTY_CELLS_TO_GO,
+                new ChronoPropertyChangeListener(
+                        board,
+                        Ms.PROPERTY_CELLS_TO_GO,
+                        chrono::start));
+        board.addPropertyChangeListener(
+                Ms.PROPERTY_WON,
+                new ChronoPropertyChangeListener(
+                        board,
+                        Ms.PROPERTY_WON,
+                        chrono::stop));
+        board.addPropertyChangeListener(
+                Ms.PROPERTY_LOST,
+                new ChronoPropertyChangeListener(
+                        board,
+                        Ms.PROPERTY_LOST,
+                        chrono::stop));
+    }
+
+    private static final Logger LOG = Logger.getLogger(
+            ChronoPropertyChangeListener.class.getSimpleName());
+
+    private static class ChronoPropertyChangeListener implements PropertyChangeListener {
+
+        Runnable toDo;
+        String propertyName;
+        Ms board;
+
+        ChronoPropertyChangeListener(Ms board, String property_name, Runnable to_do) {
+            toDo = to_do;
+            propertyName = property_name;
+            this.board = board;
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            LOG.info(evt.toString());
+            toDo.run();
+            board.removePropertyChangeListener(propertyName, this);
+        }
+
     }
 }
