@@ -221,7 +221,7 @@ public class Chronograph implements Runnable {
 
     public static String toString(long value) {
         if (value == 0) {
-            return format("     " + Unit.SEC.format, 0L);
+            return format("     " + Unit.MSEC.format, 0L);
         }
         StringBuilder sb = new StringBuilder();
         String sep = "";

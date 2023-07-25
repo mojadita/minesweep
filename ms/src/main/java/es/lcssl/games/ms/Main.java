@@ -144,6 +144,12 @@ public class Main {
                                     board,
                                     MineSweeper.PROPERTY_MINES,
                                     0, board.getMinesToMark()));
+                    time.propertyChange(
+                            new PropertyChangeEvent(
+                                    chrono, 
+                                    Chronograph.PROPERTY_TIMESTAMP, 
+                                    Chronograph.toString(0), 
+                                    Chronograph.toString(0)));
 
                     chrono.reset();
                     add_chronoChangeListeners(board, chrono);
