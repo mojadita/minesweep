@@ -56,7 +56,7 @@ import javax.swing.JPanel;
  * @author lcu
  */
 
-public class Ms extends JPanel {
+public class MineSweeper extends JPanel {
 
     public static final byte MINE = (byte) 0x80;
     public static final byte ALREADY_OPENED = 0x40;
@@ -82,13 +82,13 @@ public class Ms extends JPanel {
     private static ImageIcon exploded;
     private static ImageIcon mine;
     private static Logger LOGGER = Logger
-            .getLogger( Ms.class.getSimpleName() );
+            .getLogger(MineSweeper.class.getSimpleName() );
 
     static {
         /* class initialization code, load the icons */
         try {
             intl = ResourceBundle.getBundle( "es/lcssl/games/ms/Ms" );
-            ClassLoader cl = Ms.class.getClassLoader();
+            ClassLoader cl = MineSweeper.class.getClassLoader();
             flagged = new ImageIcon(
                     ImageIO.read( cl.getResourceAsStream(
                             "flagged.png" ) ) );
@@ -193,7 +193,7 @@ public class Ms extends JPanel {
         firePropertyChange( PROPERTY_MINES, 0, minesToMark );
     }
 
-    public Ms( int rows, int cols, double prob ) {
+    public MineSweeper( int rows, int cols, double prob ) {
         super( new GridLayout( rows, cols ) );
 
         this.rows = rows;
@@ -204,11 +204,11 @@ public class Ms extends JPanel {
         init();
     }
 
-    public Ms( int rows, int cols ) {
+    public MineSweeper( int rows, int cols ) {
         this( rows, cols, DEFAULT_PROB );
     }
 
-    public Ms() {
+    public MineSweeper() {
         this( DEFAULT_ROWS, DEFAULT_COLS, DEFAULT_PROB );
     }
 

@@ -42,19 +42,38 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 
 /**
- * Main class providing a frame and using the {@link Ms} widget to play mine
+ * Main class providing a frame and using the {@link MineSweeper} widget to play mine
  * hunting.
  *
  * @author lcu
  */
 public class Main {
 
+    private static final Logger LOG
+            = Logger.getLogger(Main.class.getSimpleName());
+
     private static final ResourceBundle intl = getBundle(
             "es/lcssl/games/ms/Main");
 
+    /**
+     * Main program, it creates a JFrame with some interesting widgets to obtain
+     * information about the {@link MineSweeper} board, and how the values are
+     * calculated.
+     *
+     * @param args parameterized options {@code --rows}, {@code --cols} and
+     * {@code --prob} are used to indicate grid rows number, grid columns number
+     * and mine probability (as a number between 0 and 100) for each grid. This
+     * last parameter is used to generate the number of cells to populate with a
+     * mine, and that number of mines is actually generated (so once calculated,
+     * exactly that number of mines is actually placed on the board) Parameters
+     * default to {@link MineSweeper#DEFAULT_ROWS} for the rows number; to
+     * {@link MineSweeper#DEFAULT_COLS} for the columns number, and to
+     * {@link MineSweeper#DEFAULT_PROB} for the number of mines calculation.
+     *
+     */
     public static void main(String[] args) {
-        int rows = Ms.DEFAULT_ROWS, cols = Ms.DEFAULT_COLS;
-        double prob = Ms.DEFAULT_PROB;
+        int rows = MineSweeper.DEFAULT_ROWS, cols = MineSweeper.DEFAULT_COLS;
+        double prob = MineSweeper.DEFAULT_PROB;
 
         /* process program arguments */
         for (int i = 0; i < args.length; i++) {
@@ -69,16 +88,15 @@ public class Main {
                     prob = Double.parseDouble(args[++i]);
                     break;
                 default:
-                    System.err.println(format(
-                            intl.getString("INVALID PARAMETER {0}"),
+                    LOG.config(format(
+                            intl.getString("INVALID_PARAMETER"),
                             args[i]));
                     break;
             }
         }
 
         JFrame frame = new JFrame(intl.getString("TITLE"));
-        Ms board = new Ms(rows, cols, prob);
-        /* this is the MineSweeper board */
+        MineSweeper board = new MineSweeper(rows, cols, prob); // this is the MineSweeper board
         JScrollPane sp = new JScrollPane(board);
         JMenuBar mb = new JMenuBar();
         frame.setJMenuBar(mb);
@@ -92,20 +110,24 @@ public class Main {
                 intl.getString("FORMAT_CELLS"),
                 board.getCellsToGo());
         board.addPropertyChangeListener(
-                Ms.PROPERTY_CELLS_TO_GO, places_to_go);
+                MineSweeper.PROPERTY_CELLS_TO_GO, 
+                places_to_go);
 
         ValueField mines_to_guard = new ValueField(
                 intl.getString("MINES"),
                 intl.getString("FORMAT_MINES"),
                 board.getMinesToMark());
         board.addPropertyChangeListener(
-                Ms.PROPERTY_MINES, mines_to_guard);
+                MineSweeper.PROPERTY_MINES, 
+                mines_to_guard);
+        
         Chronograph chrono = new Chronograph();
         ValueField time = new ValueField(
                 intl.getString("TIME"),
                 intl.getString("FORMAT_TIME"),
                 chrono);
-        chrono.addValueChangeListener(Chronograph.PROPERTY_TIMESTAMP, time);
+        chrono.addValueChangeListener(
+                Chronograph.PROPERTY_TIMESTAMP, time);
 
 
         /* add a reset menu option */
@@ -114,17 +136,17 @@ public class Main {
             public void actionPerformed(ActionEvent e) {
                 EventQueue.invokeLater(() -> {
                     board.init();
-                    places_to_go.propertyChange(
-                            new PropertyChangeEvent(
+                    places_to_go.propertyChange(new PropertyChangeEvent(
                                     board,
-                                    Ms.PROPERTY_CELLS_TO_GO,
+                                    MineSweeper.PROPERTY_CELLS_TO_GO,
                                     0, board.getCellsToGo()));
-                    mines_to_guard.propertyChange(
-                            new PropertyChangeEvent(
+                    mines_to_guard.propertyChange(new PropertyChangeEvent(
                                     board,
-                                    Ms.PROPERTY_MINES,
+                                    MineSweeper.PROPERTY_MINES,
                                     0, board.getMinesToMark()));
 
+                    chrono.reset();
+                    add_chronoChangeListeners(board, chrono);
                     board.validate();
                 });
             }
@@ -155,64 +177,65 @@ public class Main {
 //        System.out.println(board);
 
         /* register a loser callback */
-        board.addPropertyChangeListener(
-                Ms.PROPERTY_LOST, ev -> {
+        board.addPropertyChangeListener(MineSweeper.PROPERTY_LOST, ev -> {
                     if ((boolean) ev.getNewValue()) {
+                        chrono.stop();
                         JOptionPane.showMessageDialog(
                                 frame,
                                 intl.getString(
-                                        "OH!! YOU EXPLODED ON A STRONG MASER BLAST!!!"),
-                                intl.getString("ERROR MESSAGE"),
+                                        "EXPLODED"),
+                                intl.getString("ERROR_MESSAGE"),
                                 JOptionPane.ERROR_MESSAGE
                         );
-                        chrono.stop();
                     }
                 });
 
         /* ... and a winner callback */
-        board.addPropertyChangeListener(
-                Ms.PROPERTY_WON,
+        board.addPropertyChangeListener(MineSweeper.PROPERTY_WON,
                 ev -> {
+                    chrono.stop();
                     JOptionPane.showMessageDialog(
                             frame,
                             intl.getString(
-                                    "OH, WELL WELL!!! YOU WERE SMART AND YOU GUESSED ALL THE MINES"),
-                            intl.getString("SUCCESS MESSAGE"),
+                                    "SUCCESS"),
+                            intl.getString("SUCCESS_MESSAGE"),
                             JOptionPane.INFORMATION_MESSAGE);
-                        chrono.stop();
                 });
 
-        /* ... timer set */
-        board.addPropertyChangeListener(
-                Ms.PROPERTY_CELLS_TO_GO,
+        /* ... chronograph set */
+        add_chronoChangeListeners(board, chrono);
+    }
+    
+    private static void add_chronoChangeListeners(MineSweeper board, Chronograph chrono) {
+        board.addPropertyChangeListener(MineSweeper.PROPERTY_CELLS_TO_GO,
                 new ChronoPropertyChangeListener(
                         board,
-                        Ms.PROPERTY_CELLS_TO_GO,
+                        MineSweeper.PROPERTY_CELLS_TO_GO,
                         chrono::start));
-        board.addPropertyChangeListener(
-                Ms.PROPERTY_WON,
+        board.addPropertyChangeListener(MineSweeper.PROPERTY_WON,
                 new ChronoPropertyChangeListener(
                         board,
-                        Ms.PROPERTY_WON,
+                        MineSweeper.PROPERTY_WON,
                         chrono::stop));
-        board.addPropertyChangeListener(
-                Ms.PROPERTY_LOST,
+        board.addPropertyChangeListener(MineSweeper.PROPERTY_LOST,
                 new ChronoPropertyChangeListener(
                         board,
-                        Ms.PROPERTY_LOST,
+                        MineSweeper.PROPERTY_LOST,
                         chrono::stop));
+        
     }
 
-    private static final Logger LOG = Logger.getLogger(
-            ChronoPropertyChangeListener.class.getSimpleName());
+    private static class ChronoPropertyChangeListener 
+            implements PropertyChangeListener {
 
-    private static class ChronoPropertyChangeListener implements PropertyChangeListener {
+        private static final Logger LOG = Logger.getLogger(
+                ChronoPropertyChangeListener.class.getSimpleName());
 
         Runnable toDo;
         String propertyName;
-        Ms board;
+        MineSweeper board;
 
-        ChronoPropertyChangeListener(Ms board, String property_name, Runnable to_do) {
+        ChronoPropertyChangeListener(MineSweeper board, String property_name, Runnable to_do) {
             toDo = to_do;
             propertyName = property_name;
             this.board = board;
@@ -220,10 +243,10 @@ public class Main {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            LOG.info(evt.toString());
+            LOG.fine(evt.toString());
             toDo.run();
-            board.removePropertyChangeListener(propertyName, this);
+            board.removePropertyChangeListener(
+                    propertyName, this);
         }
-
     }
 }
