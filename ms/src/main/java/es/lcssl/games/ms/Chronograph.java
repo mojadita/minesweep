@@ -29,6 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import static java.text.MessageFormat.format;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 /**
@@ -41,7 +42,9 @@ import java.util.logging.Logger;
 public class Chronograph implements Runnable {
 
     private static final Logger LOG
-            = Logger.getLogger(Chronograph.class.getSimpleName());
+            = Logger.getLogger(Chronograph.class.getName());
+    private static final ResourceBundle INTL
+            = ResourceBundle.getBundle(Chronograph.class.getName());
 
     /**
      * {@link PropertyChangeListener}s registered on this property are notified
@@ -202,13 +205,13 @@ public class Chronograph implements Runnable {
     }
 
     private static enum Unit {
-        YEAR(365 * 86_400_000L, "{0}y"),
-        WEEK(7 * 86_400_000L, "{0}w"),
-        DAY(86_400_000L, "{0}d"),
-        HOUR(3600_000L, "{0}h"),
-        MIN(60_000L, "{0}m"),
-        SEC(1000L, "{0}s"),
-        MSEC(1L, "{0,number,000}ms");
+        YEAR(365 * 86_400_000L, INTL.getString("YEAR")),
+        WEEK(7 * 86_400_000L, INTL.getString("WEEK")),
+        DAY(86_400_000L, INTL.getString("DAY")),
+        HOUR(3600_000L, INTL.getString("HOUR")),
+        MIN(60_000L, INTL.getString("MIN")),
+        SEC(1000L, INTL.getString("SEC")),
+        MSEC(1L, INTL.getString("MSEC"));
 
         private long value;
         private String format;
@@ -233,7 +236,7 @@ public class Chronograph implements Runnable {
                         .append(format(
                                 u.format,
                                 units));
-                sep = ", ";
+                sep = INTL.getString("SEP");
             }
         }
         return sb.toString();

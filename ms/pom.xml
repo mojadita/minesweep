@@ -12,10 +12,9 @@
     <version>1.2</version>
     <packaging>jar</packaging>
     <name>Mine Sweeper</name>
-    <description>
-        This project implements the famous Mine Sweeper puzzle available in
-        all Windows(tm) systems.
-    </description>
+    
+    <description>This project implements the famous Mine Sweeper puzzle available in
+all Windows(tm) systems.</description>
     <developers>
         <developer>
             <name>Luis Colorado</name>

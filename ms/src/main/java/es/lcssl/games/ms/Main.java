@@ -50,10 +50,10 @@ import javax.swing.JSeparator;
 public class Main {
 
     private static final Logger LOG
-            = Logger.getLogger(Main.class.getSimpleName());
+            = Logger.getLogger(Main.class.getName());
 
-    private static final ResourceBundle intl = getBundle(
-            "es/lcssl/games/ms/Main");
+    private static final ResourceBundle intl
+            = getBundle(Main.class.getName());
 
     /**
      * Main program, it creates a JFrame with some interesting widgets to obtain

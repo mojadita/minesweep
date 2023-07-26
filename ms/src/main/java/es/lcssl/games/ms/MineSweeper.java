@@ -58,6 +58,11 @@ import javax.swing.JPanel;
 
 public class MineSweeper extends JPanel {
 
+    private static final Logger LOGGER = Logger
+            .getLogger(MineSweeper.class.getSimpleName() );
+    private static final ResourceBundle intl =
+            ResourceBundle.getBundle(MineSweeper.class.getName());
+    
     public static final byte MINE = (byte) 0x80;
     public static final byte ALREADY_OPENED = 0x40;
     public static final byte MARK_MASK = 0x20;
@@ -77,17 +82,13 @@ public class MineSweeper extends JPanel {
         Color.WHITE, Color.CYAN, Color.GREEN, Color.YELLOW,
         Color.ORANGE, Color.PINK, Color.MAGENTA, Color.RED,
         Color.DARK_GRAY };
-    private static ResourceBundle intl;
     private static ImageIcon flagged;
     private static ImageIcon exploded;
     private static ImageIcon mine;
-    private static Logger LOGGER = Logger
-            .getLogger(MineSweeper.class.getSimpleName() );
 
     static {
         /* class initialization code, load the icons */
         try {
-            intl = ResourceBundle.getBundle( "es/lcssl/games/ms/Ms" );
             ClassLoader cl = MineSweeper.class.getClassLoader();
             flagged = new ImageIcon(
                     ImageIO.read( cl.getResourceAsStream(
@@ -101,8 +102,7 @@ public class MineSweeper extends JPanel {
         } catch ( IOException | IllegalArgumentException ex ) {
             LOGGER.log( Level.SEVERE,
                         intl.getString(
-                                "CANNOT READ RESOURCES "
-                                + "'FLAGGED' &| 'EXPLODED'" ),
+                                "CANNOT_LOAD_RESOURCES" ),
                         ex );
         }
     }
@@ -249,8 +249,7 @@ public class MineSweeper extends JPanel {
 
             if ( lost || won ) {
                 /* finished game */
-                LOGGER.info( intl.getString(
-                        "ALREADY FINISHED, REINIT GAME" ) );
+                LOGGER.info( intl.getString("ALREADY_FINISHED" ) );
                 return;
             }
             
@@ -296,7 +295,7 @@ public class MineSweeper extends JPanel {
                     return;
                 }
                 LOGGER.info(
-                        format( intl.getString( "ALREADY OPENED @({0}, {1})" ),
+                        format( intl.getString( "ALREADY_OPENED" ),
                                 r, c ) );
                 return;
             }
