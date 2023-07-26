@@ -42,8 +42,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 
 /**
- * Main class providing a frame and using the {@link MineSweeper} widget to play mine
- * hunting.
+ * Main class providing a frame and using the {@link MineSweeper} widget to play
+ * mine hunting.
  *
  * @author lcu
  */
@@ -110,7 +110,7 @@ public class Main {
                 intl.getString("FORMAT_CELLS"),
                 board.getCellsToGo());
         board.addPropertyChangeListener(
-                MineSweeper.PROPERTY_CELLS_TO_GO, 
+                MineSweeper.PROPERTY_CELLS_TO_GO,
                 places_to_go);
 
         ValueField mines_to_guard = new ValueField(
@@ -118,9 +118,9 @@ public class Main {
                 intl.getString("FORMAT_MINES"),
                 board.getMinesToMark());
         board.addPropertyChangeListener(
-                MineSweeper.PROPERTY_MINES, 
+                MineSweeper.PROPERTY_MINES,
                 mines_to_guard);
-        
+
         Chronograph chrono = new Chronograph();
         ValueField time = new ValueField(
                 intl.getString("TIME"),
@@ -137,22 +137,26 @@ public class Main {
                 EventQueue.invokeLater(() -> {
                     board.init();
                     places_to_go.propertyChange(new PropertyChangeEvent(
-                                    board,
-                                    MineSweeper.PROPERTY_CELLS_TO_GO,
-                                    0, board.getCellsToGo()));
+                            board,
+                            MineSweeper.PROPERTY_CELLS_TO_GO,
+                            0, board.getCellsToGo()));
                     mines_to_guard.propertyChange(new PropertyChangeEvent(
-                                    board,
-                                    MineSweeper.PROPERTY_MINES,
-                                    0, board.getMinesToMark()));
+                            board,
+                            MineSweeper.PROPERTY_MINES,
+                            0, board.getMinesToMark()));
                     time.propertyChange(
                             new PropertyChangeEvent(
-                                    chrono, 
-                                    Chronograph.PROPERTY_TIMESTAMP, 
-                                    Chronograph.toString(0), 
+                                    chrono,
+                                    Chronograph.PROPERTY_TIMESTAMP,
+                                    Chronograph.toString(0),
                                     Chronograph.toString(0)));
 
                     chrono.reset();
-                    add_chronoChangeListeners(board, chrono);
+                    board.addPropertyChangeListener(MineSweeper.PROPERTY_CELLS_TO_GO,
+                            new ChronoPropertyChangeListener(
+                                    board,
+                                    MineSweeper.PROPERTY_CELLS_TO_GO,
+                                    chrono::start));
                     board.validate();
                 });
             }
@@ -184,17 +188,17 @@ public class Main {
 
         /* register a loser callback */
         board.addPropertyChangeListener(MineSweeper.PROPERTY_LOST, ev -> {
-                    if ((boolean) ev.getNewValue()) {
-                        chrono.stop();
-                        JOptionPane.showMessageDialog(
-                                frame,
-                                intl.getString(
-                                        "EXPLODED"),
-                                intl.getString("ERROR_MESSAGE"),
-                                JOptionPane.ERROR_MESSAGE
-                        );
-                    }
-                });
+            if ((boolean) ev.getNewValue()) {
+                chrono.stop();
+                JOptionPane.showMessageDialog(
+                        frame,
+                        intl.getString(
+                                "EXPLODED"),
+                        intl.getString("ERROR_MESSAGE"),
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
 
         /* ... and a winner callback */
         board.addPropertyChangeListener(MineSweeper.PROPERTY_WON,
@@ -209,29 +213,14 @@ public class Main {
                 });
 
         /* ... chronograph set */
-        add_chronoChangeListeners(board, chrono);
-    }
-    
-    private static void add_chronoChangeListeners(MineSweeper board, Chronograph chrono) {
         board.addPropertyChangeListener(MineSweeper.PROPERTY_CELLS_TO_GO,
                 new ChronoPropertyChangeListener(
                         board,
                         MineSweeper.PROPERTY_CELLS_TO_GO,
                         chrono::start));
-        board.addPropertyChangeListener(MineSweeper.PROPERTY_WON,
-                new ChronoPropertyChangeListener(
-                        board,
-                        MineSweeper.PROPERTY_WON,
-                        chrono::stop));
-        board.addPropertyChangeListener(MineSweeper.PROPERTY_LOST,
-                new ChronoPropertyChangeListener(
-                        board,
-                        MineSweeper.PROPERTY_LOST,
-                        chrono::stop));
-        
     }
 
-    private static class ChronoPropertyChangeListener 
+    private static class ChronoPropertyChangeListener
             implements PropertyChangeListener {
 
         private static final Logger LOG = Logger.getLogger(
