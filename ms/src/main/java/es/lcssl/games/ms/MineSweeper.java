@@ -55,14 +55,13 @@ import javax.swing.JPanel;
  *
  * @author lcu
  */
-
 public class MineSweeper extends JPanel {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(MineSweeper.class.getSimpleName() );
-    private static final ResourceBundle intl =
-            ResourceBundle.getBundle(MineSweeper.class.getName());
-    
+    private static final Logger LOGGER
+            = Logger.getLogger(MineSweeper.class.getName());
+    private static final ResourceBundle INTL
+            = ResourceBundle.getBundle(MineSweeper.class.getName());
+
     public static final byte MINE = (byte) 0x80;
     public static final byte ALREADY_OPENED = 0x40;
     public static final byte MARK_MASK = 0x20;
@@ -75,13 +74,13 @@ public class MineSweeper extends JPanel {
     public static final String PROPERTY_LOST = "lost";
     public static final String PROPERTY_WON = "won";
     public static final int PREFERRED_SIZE = 28;
-    public static final Insets DEFAULT_BUTTON_INSETS =
-            new Insets( 1, 1, 1, 1 );
+    public static final Insets DEFAULT_BUTTON_INSETS
+            = new Insets(1, 1, 1, 1);
 
     private static final Color bg[] = {
         Color.WHITE, Color.CYAN, Color.GREEN, Color.YELLOW,
         Color.ORANGE, Color.PINK, Color.MAGENTA, Color.RED,
-        Color.DARK_GRAY };
+        Color.DARK_GRAY};
     private static ImageIcon flagged;
     private static ImageIcon exploded;
     private static ImageIcon mine;
@@ -91,19 +90,19 @@ public class MineSweeper extends JPanel {
         try {
             ClassLoader cl = MineSweeper.class.getClassLoader();
             flagged = new ImageIcon(
-                    ImageIO.read( cl.getResourceAsStream(
-                            "flagged.png" ) ) );
+                    ImageIO.read(cl.getResourceAsStream(
+                            "flagged.png")));
             exploded = new ImageIcon(
-                    ImageIO.read( cl.getResourceAsStream(
-                            "exploded.png" ) ) );
+                    ImageIO.read(cl.getResourceAsStream(
+                            "exploded.png")));
             mine = new ImageIcon(
-                    ImageIO.read( cl.getResourceAsStream(
-                            "mine.png" ) ) );
-        } catch ( IOException | IllegalArgumentException ex ) {
-            LOGGER.log( Level.SEVERE,
-                        intl.getString(
-                                "CANNOT_LOAD_RESOURCES" ),
-                        ex );
+                    ImageIO.read(cl.getResourceAsStream(
+                            "mine.png")));
+        } catch (IOException | IllegalArgumentException ex) {
+            LOGGER.log(Level.SEVERE,
+                    INTL.getString(
+                            "CANNOT_LOAD_RESOURCES"),
+                    ex);
         }
     }
 
@@ -116,8 +115,8 @@ public class MineSweeper extends JPanel {
     private boolean lost = false;
     private boolean won = false;
     private double probability = DEFAULT_PROB;
-    private final PropertyChangeSupport propertyChangeSupport =
-            new PropertyChangeSupport( this );
+    private final PropertyChangeSupport propertyChangeSupport
+            = new PropertyChangeSupport(this);
 
     public void init() {
 
@@ -127,15 +126,15 @@ public class MineSweeper extends JPanel {
 
         cells = new byte[rows][cols];
 
-        for ( int i = 0; i < N; i++ ) {
+        for (int i = 0; i < N; i++) {
             array[i] = i;
             /* to select unique random cells (non-repeating) */
         }
 
-        for ( int i = 0; i < n; i++ ) {
+        for (int i = 0; i < n; i++) {
             /* cell is a random, non selected yet cell */
-            int cell = i + rnd.nextInt( N-- );
-            if ( cell != i ) {
+            int cell = i + rnd.nextInt(N--);
+            if (cell != i) {
                 /* exchange it with actual to exclude from next
                  * selections */
                 int temp = array[i];
@@ -152,49 +151,49 @@ public class MineSweeper extends JPanel {
             cells[r][c] = MINE;
 
             /* mark neighbor cells */
-            incrementSurroundingCellAt( r - 1, c - 1 );
-            incrementSurroundingCellAt( r - 1, c );
-            incrementSurroundingCellAt( r - 1, c + 1 );
-            incrementSurroundingCellAt( r, c - 1 );
-            incrementSurroundingCellAt( r, c + 1 );
-            incrementSurroundingCellAt( r + 1, c - 1 );
-            incrementSurroundingCellAt( r + 1, c );
-            incrementSurroundingCellAt( r + 1, c + 1 );
+            incrementSurroundingCellAt(r - 1, c - 1);
+            incrementSurroundingCellAt(r - 1, c);
+            incrementSurroundingCellAt(r - 1, c + 1);
+            incrementSurroundingCellAt(r, c - 1);
+            incrementSurroundingCellAt(r, c + 1);
+            incrementSurroundingCellAt(r + 1, c - 1);
+            incrementSurroundingCellAt(r + 1, c);
+            incrementSurroundingCellAt(r + 1, c + 1);
         }
         /* init the pushbuttons */
-        for ( int r = 0; r < rows; r++ ) {
-            for ( int c = 0; c < cols; c++ ) {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
                 JButton b = pushbuttonActionSupport[r][c];
                 /* if we don't still have the pushbutton, create it */
-                if ( b == null ) {
+                if (b == null) {
                     b = pushbuttonActionSupport[r][c] = new JButton();
                     /* and add to this panel */
-                    add( b );
+                    add(b);
                     /* create and sect the action associated to the button */
-                    b.setAction( new PushButtonAction( r, c, b ) );
-                    b.setMargin( DEFAULT_BUTTON_INSETS );
+                    b.setAction(new PushButtonAction(r, c, b));
+                    b.setMargin(DEFAULT_BUTTON_INSETS);
                 }
                 /* set/reset the button */
-                b.setText( null );
-                b.setIcon( null );
-                b.setBackground( null );
-                b.setForeground( null );
-                b.setBorderPainted( true );
+                b.setText(null);
+                b.setIcon(null);
+                b.setBackground(null);
+                b.setForeground(null);
+                b.setBorderPainted(true);
             }
         }
         pushbuttonActionSupport[0][0].setPreferredSize(
-                new Dimension( PREFERRED_SIZE, PREFERRED_SIZE ) );
+                new Dimension(PREFERRED_SIZE, PREFERRED_SIZE));
 
         minesToMark = n;
         cellsToGo = N;
         lost = false;
         won = false;
-        firePropertyChange( PROPERTY_CELLS_TO_GO, 0, cellsToGo );
-        firePropertyChange( PROPERTY_MINES, 0, minesToMark );
+        firePropertyChange(PROPERTY_CELLS_TO_GO, 0, cellsToGo);
+        firePropertyChange(PROPERTY_MINES, 0, minesToMark);
     }
 
-    public MineSweeper( int rows, int cols, double prob ) {
-        super( new GridLayout( rows, cols ) );
+    public MineSweeper(int rows, int cols, double prob) {
+        super(new GridLayout(rows, cols));
 
         this.rows = rows;
         this.cols = cols;
@@ -204,15 +203,15 @@ public class MineSweeper extends JPanel {
         init();
     }
 
-    public MineSweeper( int rows, int cols ) {
-        this( rows, cols, DEFAULT_PROB );
+    public MineSweeper(int rows, int cols) {
+        this(rows, cols, DEFAULT_PROB);
     }
 
     public MineSweeper() {
-        this( DEFAULT_ROWS, DEFAULT_COLS, DEFAULT_PROB );
+        this(DEFAULT_ROWS, DEFAULT_COLS, DEFAULT_PROB);
     }
 
-    private boolean isCellInBoard( int r, int c ) {
+    private boolean isCellInBoard(int r, int c) {
         return r >= 0 && r < rows && c >= 0 && c < cols;
     }
 
@@ -221,7 +220,7 @@ public class MineSweeper extends JPanel {
         public final int r, c;
         public final JButton b;
 
-        public PushButtonAction( int r, int c, JButton b ) {
+        public PushButtonAction(int r, int c, JButton b) {
             this.r = r;
             this.c = c;
             this.b = b;
@@ -229,86 +228,111 @@ public class MineSweeper extends JPanel {
 
         private void uncover(
                 final int r, final int c,
-                final ActionEvent e ) {
+                final ActionEvent e) {
 
-            if ( isCellInBoard( r, c )
-                    && (cells[r][c] & ALREADY_OPENED) == 0 ) {
+            if (isCellInBoard(r, c)
+                    && (cells[r][c] & ALREADY_OPENED) == 0) {
                 /* call the actionPerformed of the target cell with the event
                  * of the calling code */
                 pushbuttonActionSupport[r][c]
-                        .getAction().actionPerformed( e );
+                        .getAction().actionPerformed(e);
             }
         }
 
-        private boolean isMarked( int r, int c ) {
-            return isCellInBoard( r, c ) && (cells[r][c] & MARK_MASK) != 0;
+        private boolean isMarked(int r, int c) {
+            return isCellInBoard(r, c) && (cells[r][c] & MARK_MASK) != 0;
         }
 
         @Override
-        public void actionPerformed( ActionEvent e ) {
+        public void actionPerformed(ActionEvent e) {
 
-            if ( lost || won ) {
+            if (lost || won) {
                 /* finished game */
-                LOGGER.info( intl.getString("ALREADY_FINISHED" ) );
+                LOGGER.info(INTL.getString("ALREADY_FINISHED"));
                 return;
             }
-            
+
             byte cell_value = cells[r][c];
 
-            if ( (cell_value & ALREADY_OPENED) != 0 ) {
+            if ((cell_value & ALREADY_OPENED) != 0) {
                 /* already open */
-                if ( (cell_value & MINES_MASK) > 0 ) {
+                if ((cell_value & MINES_MASK) > 0) {
                     int marked = 0;
-                    if ( isMarked( r - 1, c - 1 ) ) marked++;
-                    if ( isMarked( r - 1, c ) ) marked++;
-                    if ( isMarked( r - 1, c + 1 ) ) marked++;
-                    if ( isMarked( r, c - 1 ) ) marked++;
-                    if ( isMarked( r, c + 1 ) ) marked++;
-                    if ( isMarked( r + 1, c - 1 ) ) marked++;
-                    if ( isMarked( r + 1, c ) ) marked++;
-                    if ( isMarked( r + 1, c + 1 ) ) marked++;
-                    if ( marked == (cell_value & MINES_MASK) ) {
-                        EventQueue.invokeLater( () -> {
+                    if (isMarked(r - 1, c - 1)) {
+                        marked++;
+                    }
+                    if (isMarked(r - 1, c)) {
+                        marked++;
+                    }
+                    if (isMarked(r - 1, c + 1)) {
+                        marked++;
+                    }
+                    if (isMarked(r, c - 1)) {
+                        marked++;
+                    }
+                    if (isMarked(r, c + 1)) {
+                        marked++;
+                    }
+                    if (isMarked(r + 1, c - 1)) {
+                        marked++;
+                    }
+                    if (isMarked(r + 1, c)) {
+                        marked++;
+                    }
+                    if (isMarked(r + 1, c + 1)) {
+                        marked++;
+                    }
+                    if (marked == (cell_value & MINES_MASK)) {
+                        EventQueue.invokeLater(() -> {
                             /* change the ActionEvent into an appropiate one */
                             ActionEvent e2 = new ActionEvent(
                                     this,
                                     ActionEvent.ACTION_PERFORMED,
-                                    "openflagged" );
-                            if ( !isMarked( r - 1, c - 1 ) )
-                                uncover( r - 1, c - 1, e2 );
-                            if ( !isMarked( r - 1, c ) )
-                                uncover( r - 1, c, e2 );
-                            if ( !isMarked( r - 1, c + 1 ) )
-                                uncover( r - 1, c + 1, e2 );
-                            if ( !isMarked( r, c - 1 ) )
-                                uncover( r, c - 1, e2 );
-                            if ( !isMarked( r, c + 1 ) )
-                                uncover( r, c + 1, e2 );
-                            if ( !isMarked( r + 1, c - 1 ) )
-                                uncover( r + 1, c - 1, e2 );
-                            if ( !isMarked( r + 1, c ) )
-                                uncover( r + 1, c, e2 );
-                            if ( !isMarked( r + 1, c + 1 ) )
-                                uncover( r + 1, c + 1, e2 );
-                        } );
+                                    "openflagged");
+                            if (!isMarked(r - 1, c - 1)) {
+                                uncover(r - 1, c - 1, e2);
+                            }
+                            if (!isMarked(r - 1, c)) {
+                                uncover(r - 1, c, e2);
+                            }
+                            if (!isMarked(r - 1, c + 1)) {
+                                uncover(r - 1, c + 1, e2);
+                            }
+                            if (!isMarked(r, c - 1)) {
+                                uncover(r, c - 1, e2);
+                            }
+                            if (!isMarked(r, c + 1)) {
+                                uncover(r, c + 1, e2);
+                            }
+                            if (!isMarked(r + 1, c - 1)) {
+                                uncover(r + 1, c - 1, e2);
+                            }
+                            if (!isMarked(r + 1, c)) {
+                                uncover(r + 1, c, e2);
+                            }
+                            if (!isMarked(r + 1, c + 1)) {
+                                uncover(r + 1, c + 1, e2);
+                            }
+                        });
                     }
                     return;
                 }
                 LOGGER.info(
-                        format( intl.getString( "ALREADY_OPENED" ),
-                                r, c ) );
+                        format(
+                                INTL.getString("ALREADY_OPENED"),
+                                r,
+                                c));
                 return;
             }
 
-            if ( (e.getModifiers() & ActionEvent.SHIFT_MASK) != 0
-                    || (cell_value & MARK_MASK) != 0)
-            {
+            if ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0
+                    || (cell_value & MARK_MASK) != 0) {
                 /* switch marked mine */
                 cells[r][c] ^= MARK_MASK;
                 pushbuttonActionSupport[r][c].setIcon(
                         (cell_value & MARK_MASK) == 0
                                 ? flagged
-                                : null );
+                                : null);
                 int old_val = minesToMark;
                 minesToMark += (cell_value & MARK_MASK) == 0
                         ? -1
@@ -316,72 +340,73 @@ public class MineSweeper extends JPanel {
                 propertyChangeSupport
                         .firePropertyChange(
                                 PROPERTY_MINES,
-                                old_val, minesToMark );
+                                old_val, minesToMark);
                 return;
             }
 
-            b.setBorderPainted( false );
+            b.setBorderPainted(false);
 
-            if ( cell_value == MINE ) {
+            if (cell_value == MINE) {
                 /* We hit a mine */
-                b.setIcon( exploded );
-                b.setBackground( Color.white );
+                b.setIcon(exploded);
+                b.setBackground(Color.white);
                 lost = true;
-                for ( int r = 0; r < rows; r++ ) {
-                    for ( int c = 0; c < cols; c++ ) {
-                        final JButton to_change =
-                                pushbuttonActionSupport[r][c];
-                        if ( (cells[r][c] & MINE) != 0
-                                && to_change != b ) {
-                            EventQueue.invokeLater( () -> {
-                                to_change.setIcon( mine );
-                            } );
+                for (int r = 0; r < rows; r++) {
+                    for (int c = 0; c < cols; c++) {
+                        final JButton to_change
+                                = pushbuttonActionSupport[r][c];
+                        if ((cells[r][c] & MINE) != 0
+                                && to_change != b) {
+                            EventQueue.invokeLater(() -> {
+                                to_change.setIcon(mine);
+                            });
                         }
                     }
                 }
                 propertyChangeSupport
-                        .firePropertyChange( PROPERTY_LOST,
-                                             false, lost );
+                        .firePropertyChange(PROPERTY_LOST,
+                                false, lost);
                 return;
             }
 
             /* not already open
              * not a mine, and covered, uncover */
             int surrounding = cell_value & MINES_MASK;
-            b.setBackground( bg[surrounding] );
-            if ( surrounding >= 6 ) {
-                b.setForeground( Color.WHITE );
+            b.setBackground(bg[surrounding]);
+            if (surrounding >= 6) {
+                b.setForeground(Color.WHITE);
             }
-            if ( surrounding > 0 ) {
-                b.setText( format( "{0}", surrounding ) );
+            if (surrounding > 0) {
+                b.setText(format("{0}", surrounding));
             }
 
             int old = cellsToGo--;
 
             propertyChangeSupport
-                    .firePropertyChange( PROPERTY_CELLS_TO_GO,
-                                         old, cellsToGo );
-            if ( cellsToGo == 0 && !won ) {
+                    .firePropertyChange(
+                            PROPERTY_CELLS_TO_GO,
+                            old, cellsToGo);
+            if (cellsToGo == 0 && !won) {
                 won = true;
                 propertyChangeSupport
-                        .firePropertyChange( PROPERTY_WON,
-                                             false, true );
+                        .firePropertyChange(PROPERTY_WON,
+                                false, true);
                 return;
             }
 
             cells[r][c] |= ALREADY_OPENED;
-            if ( surrounding == 0 ) {
+            if (surrounding == 0) {
                 /* surrounding == 0, uncover all surrounding */
-                EventQueue.invokeLater( () -> {
-                    uncover( r - 1, c - 1, e );
-                    uncover( r - 1, c, e );
-                    uncover( r - 1, c + 1, e );
-                    uncover( r, c - 1, e );
-                    uncover( r, c + 1, e );
-                    uncover( r + 1, c - 1, e );
-                    uncover( r + 1, c, e );
-                    uncover( r + 1, c + 1, e );
-                } );
+                EventQueue.invokeLater(() -> {
+                    uncover(r - 1, c - 1, e);
+                    uncover(r - 1, c, e);
+                    uncover(r - 1, c + 1, e);
+                    uncover(r, c - 1, e);
+                    uncover(r, c + 1, e);
+                    uncover(r + 1, c - 1, e);
+                    uncover(r + 1, c, e);
+                    uncover(r + 1, c + 1, e);
+                });
             }
         }
     }
@@ -389,21 +414,21 @@ public class MineSweeper extends JPanel {
     @Override
     public void addPropertyChangeListener(
             String property,
-            PropertyChangeListener listener ) {
+            PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(
-                property, listener );
+                property, listener);
     }
 
     @Override
     public void removePropertyChangeListener(
             String property,
-            PropertyChangeListener listener ) {
+            PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(
-                property, listener );
+                property, listener);
     }
 
-    private void incrementSurroundingCellAt( int r, int c ) {
-        if ( isCellInBoard( r, c ) && cells[r][c] != MINE ) {
+    private void incrementSurroundingCellAt(int r, int c) {
+        if (isCellInBoard(r, c) && cells[r][c] != MINE) {
             cells[r][c]++;
         }
     }
@@ -420,33 +445,33 @@ public class MineSweeper extends JPanel {
         return lost;
     }
 
-    private void line( StringBuilder sb ) {
-        sb.append( "+" );
-        for ( int c = 0; c < cols; c++ ) {
-            sb.append( "--" );
+    private void line(StringBuilder sb) {
+        sb.append("+");
+        for (int c = 0; c < cols; c++) {
+            sb.append("--");
         }
-        sb.append( "-+\n" );
+        sb.append("-+\n");
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        line( sb );
-        for ( int r = 0; r < rows; r++ ) {
-            sb.append( "|" );
-            for ( int c = 0; c < cols; c++ ) {
-                if ( cells[r][c] == MINE ) {
-                    sb.append( " @" );
-                } else if ( (cells[r][c] & MINES_MASK) == 0 ) {
-                    sb.append( "  " );
+        line(sb);
+        for (int r = 0; r < rows; r++) {
+            sb.append("|");
+            for (int c = 0; c < cols; c++) {
+                if (cells[r][c] == MINE) {
+                    sb.append(" @");
+                } else if ((cells[r][c] & MINES_MASK) == 0) {
+                    sb.append("  ");
                 } else {
-                    sb.append( format( " {0}",
-                                       cells[r][c] & MINES_MASK ) );
+                    sb.append(format(" {0}",
+                            cells[r][c] & MINES_MASK));
                 }
             }
-            sb.append( " |\n" );
+            sb.append(" |\n");
         }
-        line( sb );
+        line(sb);
         return sb.toString();
     }
 }

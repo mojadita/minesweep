@@ -114,11 +114,11 @@ public class Chronograph implements Runnable {
         prev_value = last_value;
         last_value = getTimeMillis();
         if (prev_value != last_value) {
-                propertyChange.firePropertyChange(
-                        PROPERTY_TIMESTAMP,
-                        toString(prev_value),
-                        toString(last_value));
-                LOG.finest("update()");
+            propertyChange.firePropertyChange(
+                    PROPERTY_TIMESTAMP,
+                    toString(prev_value),
+                    toString(last_value));
+            LOG.finest("update()");
         }
     }
 
@@ -185,7 +185,7 @@ public class Chronograph implements Runnable {
             PropertyChangeListener listener) {
         propertyChange.addPropertyChangeListener(name, listener);
         LOG.fine(format("Add listener {0} to {1}",
-                        listener, name));
+                listener, name));
     }
 
     public void removeValueChangeListener(
@@ -193,7 +193,7 @@ public class Chronograph implements Runnable {
             PropertyChangeListener listener) {
         propertyChange.removePropertyChangeListener(name, listener);
         LOG.fine(format("Remove listener {0} to {1}",
-                        listener, name));
+                listener, name));
     }
 
     public long getTimeMillis() {
@@ -212,6 +212,8 @@ public class Chronograph implements Runnable {
         MIN(60_000L, INTL.getString("MIN")),
         SEC(1000L, INTL.getString("SEC")),
         MSEC(1L, INTL.getString("MSEC"));
+        
+        public static final String SEP = INTL.getString("SEP");
 
         private long value;
         private String format;
@@ -236,7 +238,7 @@ public class Chronograph implements Runnable {
                         .append(format(
                                 u.format,
                                 units));
-                sep = INTL.getString("SEP");
+                sep = Unit.SEP;
             }
         }
         return sb.toString();
