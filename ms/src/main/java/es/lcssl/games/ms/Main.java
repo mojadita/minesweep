@@ -90,7 +90,7 @@ public class Main {
                 default:
                     LOG.config(format(
                             intl.getString("INVALID_PARAMETER"),
-                            args[i]));
+                            i, args[i]));
                     break;
             }
         }

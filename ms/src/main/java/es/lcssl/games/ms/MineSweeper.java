@@ -37,7 +37,6 @@ import java.io.IOException;
 import static java.text.MessageFormat.format;
 import java.util.Random;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -99,10 +98,9 @@ public class MineSweeper extends JPanel {
                     ImageIO.read(cl.getResourceAsStream(
                             "mine.png")));
         } catch (IOException | IllegalArgumentException ex) {
-            LOGGER.log(Level.SEVERE,
-                    INTL.getString(
+            LOGGER.severe(() -> format(INTL.getString(
                             "CANNOT_LOAD_RESOURCES"),
-                    ex);
+                    ex));
         }
     }
 

@@ -43,6 +43,7 @@ public class Chronograph implements Runnable {
 
     private static final Logger LOG
             = Logger.getLogger(Chronograph.class.getName());
+
     private static final ResourceBundle INTL
             = ResourceBundle.getBundle(Chronograph.class.getName());
 
@@ -118,7 +119,8 @@ public class Chronograph implements Runnable {
                     PROPERTY_TIMESTAMP,
                     toString(prev_value),
                     toString(last_value));
-            LOG.finest("update()");
+            LOG.finest(() -> format(
+                    INTL.getString("UPDATE_CALLED"), this));
         }
     }
 
@@ -131,7 +133,8 @@ public class Chronograph implements Runnable {
         started = false; // so, chrono is stopped, any started thread will stop
         startTime = System.currentTimeMillis(); // so time starts now
         last_value = 0; // so duration shows 0
-        LOG.info("reset() called\n");
+        LOG.info(() -> format(INTL.getString("RESET_CALLED"), 
+                this));
         update();
     }
 
@@ -149,7 +152,8 @@ public class Chronograph implements Runnable {
         started = true;
         updatingThread = new Thread(this);
         updatingThread.start();
-        LOG.info("start() called\n");
+        LOG.fine(() -> format(
+                INTL.getString("START_CALLED"), this));
         update();
     }
 
@@ -160,7 +164,8 @@ public class Chronograph implements Runnable {
     public synchronized void stop() {
         started = false;
         /* now we are stopped. */
-        LOG.info("stop() called\n");
+        LOG.fine(() -> format(
+                INTL.getString("STOP_CALLED"), this));
         update();
     }
 
@@ -176,6 +181,9 @@ public class Chronograph implements Runnable {
                 update();
             } catch (InterruptedException e) {
                 // Just ignore the exception, as the next loop test will fail.
+                LOG.fine(() -> format(
+                        INTL.getString("INTERRUPTED"), 
+                        this));
             }
         }
     }
@@ -184,16 +192,16 @@ public class Chronograph implements Runnable {
             String name,
             PropertyChangeListener listener) {
         propertyChange.addPropertyChangeListener(name, listener);
-        LOG.fine(format("Add listener {0} to {1}",
-                listener, name));
+        LOG.fine(() -> format(INTL.getString("ADD_LISTENER"),
+                this, listener, name));
     }
 
     public void removeValueChangeListener(
             String name,
             PropertyChangeListener listener) {
         propertyChange.removePropertyChangeListener(name, listener);
-        LOG.fine(format("Remove listener {0} to {1}",
-                listener, name));
+        LOG.fine(() -> format(INTL.getString("REMOVE_LISTENER"),
+                this, listener, name));
     }
 
     public long getTimeMillis() {
