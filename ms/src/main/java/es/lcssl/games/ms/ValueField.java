@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, lcu
+ * Copyright (c) 2023, lcu.  Dedicated to Maela
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,10 +27,11 @@ package es.lcssl.games.ms;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import static java.text.MessageFormat.format;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.border.BevelBorder;
+
+import static java.text.MessageFormat.format;
 
 /**
  *
@@ -40,18 +41,18 @@ public class ValueField extends JLabel implements PropertyChangeListener {
 
     public final String format;
 
-    public ValueField( String name, String format, Object initial_value) {
-        super(name);
+    public ValueField( String name, String format, Object initial_value ) {
+        super( name );
         this.format = format;
         setBorder( BorderFactory.createTitledBorder(
                 BorderFactory.createBevelBorder(
                         BevelBorder.LOWERED ), name ) );
-        setText(format(this.format, initial_value ) );
+        setText( format( this.format, initial_value ) );
     }
 
 
     @Override
     public void propertyChange( PropertyChangeEvent evt ) {
-        setText(format(format, evt.getNewValue() ) );
+        setText( format( format, evt.getNewValue() ) );
     }
 }

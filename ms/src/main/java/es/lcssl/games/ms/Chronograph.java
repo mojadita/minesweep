@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, lcu
+ * Copyright (c) 2023, lcu. Dedicated to Maela
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,12 +28,14 @@ package es.lcssl.games.ms;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import static java.text.MessageFormat.format;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import static java.text.MessageFormat.format;
+
 /**
- * A {@code Chronograph} is the closest to a manual chronograph to measure time
+ * A {@code Chronograph} is the closest to a manual chronograph to measure
+ * time
  * that we have been able to implement in software. It works like a handheld
  * chronograph, with a {@link #start() } button, a {@link #stop() } button
  *
@@ -41,14 +43,15 @@ import java.util.logging.Logger;
  */
 public class Chronograph implements Runnable {
 
-    private static final Logger LOG
-            = Logger.getLogger(Chronograph.class.getName());
+    private static final Logger LOG =
+            Logger.getLogger( Chronograph.class.getName() );
 
-    private static final ResourceBundle INTL
-            = ResourceBundle.getBundle(Chronograph.class.getName());
+    private static final ResourceBundle INTL =
+            ResourceBundle.getBundle( Chronograph.class.getName() );
 
     /**
-     * {@link PropertyChangeListener}s registered on this property are notified
+     * {@link PropertyChangeListener}s registered on this property are
+     * notified
      * of realtime changes at intervals specified by the
      */
     public static final String PROPERTY_TIMESTAMP = "timestamp";
@@ -57,14 +60,16 @@ public class Chronograph implements Runnable {
      * The pace at which updates are signalled to screen display widgets. The
      * value specified is bout 24 notifies per second, approx. the display
      * refresh time. The {@link Chronograph} starts a {@link Thread} when
-     * started, that loops on this time, to notify all listeners that they have
+     * started, that loops on this time, to notify all listeners that they
+     * have
      * to update the time. This thread runs while the
      * {@link Chronograph#isStarted() } returns {@code true}.
      */
     public static final long WHEN_TO_RUN = 42;
 
     /**
-     * This value stores the starting time of the Chronograph. The returned time
+     * This value stores the starting time of the Chronograph. The returned
+     * time
      * of a Chronograph object is so, the difference between actual time (as
      * returned by {@link System#currentTimeMillis() }) and this field (in
      * millisec) and can be computed without drifting the computed value or
@@ -81,7 +86,8 @@ public class Chronograph implements Runnable {
     /**
      * Each time a new value is obtained from the Chronograph, the value is
      * stored in this field, in order to have a valid (frozen) value, when the
-     * Chronograph is stopped. So, the value of {@link #last_value} is used when
+     * Chronograph is stopped. So, the value of {@link #last_value} is used
+     * when
      * the Chronograph instance has been stopped, and the value is instead
      * calculated, when the Chronograph is running.
      */
@@ -94,8 +100,8 @@ public class Chronograph implements Runnable {
      * regularly of changes in time, so the screen reflects accurately the
      * elapsed time.
      */
-    PropertyChangeSupport propertyChange
-            = new PropertyChangeSupport(this);
+    PropertyChangeSupport propertyChange =
+            new PropertyChangeSupport( this );
 
     /**
      * Updating thread. This thread is created/started at {@link #start()} and
@@ -105,36 +111,40 @@ public class Chronograph implements Runnable {
     private Thread updatingThread;
 
     /**
-     * This method is responsible of taking a sample of the time to be displayed
+     * This method is responsible of taking a sample of the time to be
+     * displayed
      * on the output widgets that are showing the time in real time. For that,
-     * first a sample is taken (which updates the {@link #last_value} field, and
-     * a {@link PropertyChangeEvent} is sent to all listeners waiting for it to
+     * first a sample is taken (which updates the {@link #last_value} field,
+     * and
+     * a {@link PropertyChangeEvent} is sent to all listeners waiting for it
+     * to
      * be displayed.
      */
     protected void update() {
         prev_value = last_value;
         last_value = getTimeMillis();
-        if (prev_value != last_value) {
+        if ( prev_value != last_value ) {
             propertyChange.firePropertyChange(
                     PROPERTY_TIMESTAMP,
-                    toString(prev_value),
-                    toString(last_value));
-            LOG.finest(() -> format(
-                    INTL.getString("UPDATE_CALLED"), this));
+                    toString( prev_value ),
+                    toString( last_value ) );
+            LOG.finest( () -> format(
+                    INTL.getString( "UPDATE_CALLED" ), this ) );
         }
     }
 
     /**
      * This method sets the {@link #startTime} to the current time, so if we
-     * read the {@link Chronograph} we will get a reading of 0. A final call to
+     * read the {@link Chronograph} we will get a reading of 0. A final call
+     * to
      * {@link #update()} is made to refresh anything on screen.
      */
     public synchronized void reset() {
         started = false; // so, chrono is stopped, any started thread will stop
         startTime = System.currentTimeMillis(); // so time starts now
         last_value = 0; // so duration shows 0
-        LOG.info(() -> format(INTL.getString("RESET_CALLED"), 
-                this));
+        LOG.info( () -> format( INTL.getString( "RESET_CALLED" ),
+                                  this ) );
         update();
     }
 
@@ -145,15 +155,15 @@ public class Chronograph implements Runnable {
      * everything on the screen.
      */
     public synchronized void start() {
-        if (started) {
+        if ( started ) {
             return; // already started.
         }
         startTime = System.currentTimeMillis();
         started = true;
-        updatingThread = new Thread(this);
+        updatingThread = new Thread( this );
         updatingThread.start();
-        LOG.fine(() -> format(
-                INTL.getString("START_CALLED"), this));
+        LOG.fine( () -> format(
+                INTL.getString( "START_CALLED" ), this ) );
         update();
     }
 
@@ -164,8 +174,8 @@ public class Chronograph implements Runnable {
     public synchronized void stop() {
         started = false;
         /* now we are stopped. */
-        LOG.fine(() -> format(
-                INTL.getString("STOP_CALLED"), this));
+        LOG.fine( () -> format(
+                INTL.getString( "STOP_CALLED" ), this ) );
         update();
     }
 
@@ -175,37 +185,37 @@ public class Chronograph implements Runnable {
 
     @Override
     public void run() {
-        while (isStarted()) {
+        while ( isStarted() ) {
             try {
-                Thread.sleep(WHEN_TO_RUN);
+                Thread.sleep( WHEN_TO_RUN );
                 update();
-            } catch (InterruptedException e) {
+            } catch ( InterruptedException e ) {
                 // Just ignore the exception, as the next loop test will fail.
-                LOG.fine(() -> format(
-                        INTL.getString("INTERRUPTED"), 
-                        this));
+                LOG.fine( () -> format(
+                        INTL.getString( "INTERRUPTED" ),
+                        this ) );
             }
         }
     }
 
     public void addValueChangeListener(
             String name,
-            PropertyChangeListener listener) {
-        propertyChange.addPropertyChangeListener(name, listener);
-        LOG.fine(() -> format(INTL.getString("ADD_LISTENER"),
-                this, listener, name));
+            PropertyChangeListener listener ) {
+        propertyChange.addPropertyChangeListener( name, listener );
+        LOG.fine( () -> format( INTL.getString( "ADD_LISTENER" ),
+                                  this, listener, name ) );
     }
 
     public void removeValueChangeListener(
             String name,
-            PropertyChangeListener listener) {
-        propertyChange.removePropertyChangeListener(name, listener);
-        LOG.fine(() -> format(INTL.getString("REMOVE_LISTENER"),
-                this, listener, name));
+            PropertyChangeListener listener ) {
+        propertyChange.removePropertyChangeListener( name, listener );
+        LOG.fine( () -> format( INTL.getString( "REMOVE_LISTENER" ),
+                                  this, listener, name ) );
     }
 
     public long getTimeMillis() {
-        if (isStarted()) {
+        if ( isStarted() ) {
             return System.currentTimeMillis() - startTime;
         } else {
             return last_value;
@@ -213,39 +223,39 @@ public class Chronograph implements Runnable {
     }
 
     private static enum Unit {
-        YEAR(365 * 86_400_000L, INTL.getString("YEAR")),
-        WEEK(7 * 86_400_000L, INTL.getString("WEEK")),
-        DAY(86_400_000L, INTL.getString("DAY")),
-        HOUR(3600_000L, INTL.getString("HOUR")),
-        MIN(60_000L, INTL.getString("MIN")),
-        SEC(1000L, INTL.getString("SEC")),
-        MSEC(1L, INTL.getString("MSEC"));
-        
-        public static final String SEP = INTL.getString("SEP");
+        YEAR( 365 * 86_400_000L, INTL.getString( "YEAR" ) ),
+        WEEK( 7 * 86_400_000L, INTL.getString( "WEEK" ) ),
+        DAY( 86_400_000L, INTL.getString( "DAY" ) ),
+        HOUR( 3600_000L, INTL.getString( "HOUR" ) ),
+        MIN( 60_000L, INTL.getString( "MIN" ) ),
+        SEC( 1000L, INTL.getString( "SEC" ) ),
+        MSEC( 1L, INTL.getString( "MSEC" ) );
+
+        public static final String SEP = INTL.getString( "SEP" );
 
         private long value;
         private String format;
 
-        Unit(long val, String nam) {
+        Unit( long val, String nam ) {
             value = val;
             format = nam;
         }
     }
 
-    public static String toString(long value) {
-        if (value == 0) {
-            return format("     " + Unit.MSEC.format, 0L);
+    public static String toString( long value ) {
+        if ( value == 0 ) {
+            return format( "     " + Unit.MSEC.format, 0L );
         }
         StringBuilder sb = new StringBuilder();
         String sep = "";
-        for (Unit u : Unit.values()) {
+        for ( Unit u: Unit.values() ) {
             long units = value / u.value;
             value %= u.value;
-            if (units != 0) {
-                sb.append(sep)
-                        .append(format(
+            if ( units != 0 ) {
+                sb.append( sep )
+                        .append( format(
                                 u.format,
-                                units));
+                                units ) );
                 sep = Unit.SEP;
             }
         }
@@ -254,6 +264,6 @@ public class Chronograph implements Runnable {
 
     @Override
     public String toString() {
-        return toString(last_value);
+        return toString( last_value );
     }
 }
