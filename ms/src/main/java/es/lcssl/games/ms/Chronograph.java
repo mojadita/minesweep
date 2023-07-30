@@ -121,6 +121,9 @@ public class Chronograph implements Runnable {
      * be displayed.
      */
     protected void update() {
+        LOG.finest( () -> format(
+                INTL.getString( "UPDATE_CALLED" ),
+                this ) );
         prev_value = last_value;
         last_value = getTimeMillis();
         if ( prev_value != last_value ) {
@@ -128,8 +131,6 @@ public class Chronograph implements Runnable {
                     PROPERTY_TIMESTAMP,
                     toString( prev_value ),
                     toString( last_value ) );
-            LOG.finest( () -> format(
-                    INTL.getString( "UPDATE_CALLED" ), this ) );
         }
     }
 
@@ -140,11 +141,12 @@ public class Chronograph implements Runnable {
      * {@link #update()} is made to refresh anything on screen.
      */
     public synchronized void reset() {
+        LOG.info( () -> format(
+                INTL.getString( "RESET_CALLED" ),
+                this ) );
         started = false; // so, chrono is stopped, any started thread will stop
         startTime = System.currentTimeMillis(); // so time starts now
         last_value = 0; // so duration shows 0
-        LOG.info( () -> format( INTL.getString( "RESET_CALLED" ),
-                                  this ) );
         update();
     }
 
@@ -155,15 +157,19 @@ public class Chronograph implements Runnable {
      * everything on the screen.
      */
     public synchronized void start() {
+        LOG.fine( () -> format(
+                INTL.getString( "START_CALLED" ),
+                this ) );
         if ( started ) {
+            LOG.info( () -> format(
+                    INTL.getString( "ALREADY_STARTED" ),
+                    this ) );
             return; // already started.
         }
         startTime = System.currentTimeMillis();
         started = true;
         updatingThread = new Thread( this );
         updatingThread.start();
-        LOG.fine( () -> format(
-                INTL.getString( "START_CALLED" ), this ) );
         update();
     }
 
@@ -172,10 +178,11 @@ public class Chronograph implements Runnable {
      * {@link #started} to {@code false}, so no more updates are done.
      */
     public synchronized void stop() {
-        started = false;
         /* now we are stopped. */
         LOG.fine( () -> format(
-                INTL.getString( "STOP_CALLED" ), this ) );
+                INTL.getString( "STOP_CALLED" ),
+                this ) );
+        started = false;
         update();
     }
 
@@ -202,16 +209,23 @@ public class Chronograph implements Runnable {
             String name,
             PropertyChangeListener listener ) {
         propertyChange.addPropertyChangeListener( name, listener );
-        LOG.fine( () -> format( INTL.getString( "ADD_LISTENER" ),
-                                  this, listener, name ) );
+        LOG.fine( () -> format(
+                INTL.getString( "ADD_LISTENER" ),
+                this,
+                listener,
+                name ) );
     }
 
     public void removeValueChangeListener(
             String name,
             PropertyChangeListener listener ) {
-        propertyChange.removePropertyChangeListener( name, listener );
-        LOG.fine( () -> format( INTL.getString( "REMOVE_LISTENER" ),
-                                  this, listener, name ) );
+        LOG.fine( () -> format(
+                INTL.getString( "REMOVE_LISTENER" ),
+                this,
+                listener,
+                name ) );
+        propertyChange.removePropertyChangeListener(
+                name, listener );
     }
 
     public long getTimeMillis() {
@@ -231,20 +245,21 @@ public class Chronograph implements Runnable {
         SEC( 1000L, INTL.getString( "SEC" ) ),
         MSEC( 1L, INTL.getString( "MSEC" ) );
 
-        public static final String SEP = INTL.getString( "SEP" );
+        public static final String SEP =
+                INTL.getString( "SEP" );
 
-        private long value;
-        private String format;
+        private final long value;
+        private final String format;
 
-        Unit( long val, String nam ) {
-            value = val;
-            format = nam;
+        Unit( long value, String format ) {
+            this.value = value;
+            this.format = format;
         }
     }
 
     public static String toString( long value ) {
         if ( value == 0 ) {
-            return format( "     " + Unit.MSEC.format, 0L );
+            return format( Unit.MSEC.format, 0L );
         }
         StringBuilder sb = new StringBuilder();
         String sep = "";
