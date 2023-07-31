@@ -157,7 +157,7 @@ public class Chronograph implements Runnable {
      * everything on the screen.
      */
     public synchronized void start() {
-        LOG.fine( () -> format(
+        LOG.info( () -> format(
                 INTL.getString( "START_CALLED" ),
                 this ) );
         if ( started ) {
@@ -179,7 +179,7 @@ public class Chronograph implements Runnable {
      */
     public synchronized void stop() {
         /* now we are stopped. */
-        LOG.fine( () -> format(
+        LOG.info( () -> format(
                 INTL.getString( "STOP_CALLED" ),
                 this ) );
         started = false;
@@ -209,7 +209,7 @@ public class Chronograph implements Runnable {
             String name,
             PropertyChangeListener listener ) {
         propertyChange.addPropertyChangeListener( name, listener );
-        LOG.fine( () -> format(
+        LOG.info( () -> format(
                 INTL.getString( "ADD_LISTENER" ),
                 this,
                 listener,
@@ -219,7 +219,7 @@ public class Chronograph implements Runnable {
     public void removeValueChangeListener(
             String name,
             PropertyChangeListener listener ) {
-        LOG.fine( () -> format(
+        LOG.info( () -> format(
                 INTL.getString( "REMOVE_LISTENER" ),
                 this,
                 listener,

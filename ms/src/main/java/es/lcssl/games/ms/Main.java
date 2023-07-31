@@ -104,7 +104,9 @@ public class Main {
         }
 
         JFrame frame = new JFrame( intl.getString( "TITLE" ) );
-        MineSweeper board = new MineSweeper( rows, cols, prob ); // this is the MineSweeper board
+
+        // this is the MineSweeper board
+        MineSweeper board = new MineSweeper( rows, cols, prob );
         JScrollPane sp = new JScrollPane( board );
         JMenuBar mb = new JMenuBar();
         frame.setJMenuBar( mb );
@@ -125,6 +127,7 @@ public class Main {
                 intl.getString( "MINES" ),
                 intl.getString( "FORMAT_MINES" ),
                 board.getMinesToMark() );
+
         board.addPropertyChangeListener(
                 MineSweeper.PROPERTY_MINES,
                 mines_to_guard );
@@ -134,6 +137,7 @@ public class Main {
                 intl.getString( "TIME" ),
                 intl.getString( "FORMAT_TIME" ),
                 chrono );
+
         chrono.addValueChangeListener(
                 Chronograph.PROPERTY_TIMESTAMP, time );
 
@@ -205,31 +209,29 @@ public class Main {
                                                          "EXPLODED" ),
                                                  intl.getString(
                                                          "ERROR_MESSAGE" ),
-                                                 JOptionPane.ERROR_MESSAGE
-                                         );
+                                                 JOptionPane.ERROR_MESSAGE );
                                      }
                                  } );
 
         /* ... and a winner callback */
-        board.addPropertyChangeListener( MineSweeper.PROPERTY_WON,
-                                         ev -> {
-                                     chrono.stop();
-                                     JOptionPane.showMessageDialog(
-                                             frame,
-                                             intl.getString(
-                                                     "SUCCESS" ),
-                                             intl
-                                                     .getString(
-                                                             "SUCCESS_MESSAGE" ),
-                                             JOptionPane.INFORMATION_MESSAGE );
-                                 } );
+        board.addPropertyChangeListener(
+                MineSweeper.PROPERTY_WON,
+                ev -> {
+            chrono.stop();
+            JOptionPane.showMessageDialog(
+                    frame,
+                    intl.getString( "SUCCESS" ),
+                    intl.getString( "SUCCESS_MESSAGE" ),
+                    JOptionPane.INFORMATION_MESSAGE );
+        } );
 
         /* ... chronograph set */
-        board.addPropertyChangeListener( MineSweeper.PROPERTY_CELLS_TO_GO,
-                                         new ChronoPropertyChangeListener(
-                                                 board,
-                                                 MineSweeper.PROPERTY_CELLS_TO_GO,
-                                                 chrono::start ) );
+        board.addPropertyChangeListener(
+                MineSweeper.PROPERTY_CELLS_TO_GO,
+                new ChronoPropertyChangeListener(
+                        board,
+                        MineSweeper.PROPERTY_CELLS_TO_GO,
+                        chrono::start ) );
     }
 
     private static class ChronoPropertyChangeListener
