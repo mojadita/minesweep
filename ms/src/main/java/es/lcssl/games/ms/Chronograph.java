@@ -183,6 +183,9 @@ public class Chronograph implements Runnable {
                 INTL.getString( "STOP_CALLED" ),
                 this ) );
         started = false;
+        if (updatingThread != null)
+            updatingThread.interrupt();
+        updatingThread = null;
         update();
     }
 
