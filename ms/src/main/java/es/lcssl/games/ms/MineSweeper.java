@@ -84,6 +84,7 @@ public class MineSweeper extends JPanel {
     private static ImageIcon flagged;
     private static ImageIcon exploded;
     private static ImageIcon mine;
+    private static ImageIcon questionMark;
 
     static {
         /* class initialization code, load the icons */
@@ -98,6 +99,9 @@ public class MineSweeper extends JPanel {
             mine = new ImageIcon(
                     ImageIO.read( cl.getResourceAsStream(
                             "mine.png" ) ) );
+            questionMark = new ImageIcon(
+                    ImageIO.read( cl.getResourceAsStream(
+                            "question.png" ) ) );
         } catch ( IOException | IllegalArgumentException ex ) {
             LOGGER.severe( () -> format( INTL.getString(
                     "CANNOT_LOAD_RESOURCES" ),
@@ -354,11 +358,21 @@ public class MineSweeper extends JPanel {
                     for ( int c = 0; c < cols; c++ ) {
                         final JButton to_change =
                                 pushbuttonActionSupport[r][c];
-                        if ( (cells[r][c] & MINE) != 0
-                                && to_change != b ) {
-                            EventQueue.invokeLater( () -> {
-                                to_change.setIcon( mine );
-                            } );
+                        final int the_cell = cells[r][c] & (MARK_MASK | MINE);
+
+                        if ( to_change != b ) {
+                            switch ( the_cell ) {
+                            case MARK_MASK: // MARK_MASK and no MINE
+                                EventQueue.invokeLater( () -> {
+                                    to_change.setIcon( questionMark );
+                                } );
+                                break;
+                            case MINE: // MINE and not MARK_MASK
+                                EventQueue.invokeLater( () -> {
+                                    to_change.setIcon( mine );
+                                } );
+                                break;
+                            }
                         }
                     }
                 }
@@ -413,7 +427,8 @@ public class MineSweeper extends JPanel {
     @Override
     public void addPropertyChangeListener(
             String property,
-            PropertyChangeListener listener ) {
+            PropertyChangeListener listener
+    ) {
         propertyChangeSupport.addPropertyChangeListener(
                 property, listener );
     }
@@ -421,10 +436,13 @@ public class MineSweeper extends JPanel {
     @Override
     public void removePropertyChangeListener(
             String property,
-            PropertyChangeListener listener ) {
-        propertyChangeSupport.removePropertyChangeListener(
-                property, listener );
+            PropertyChangeListener listener
+    ) {
+        propertyChangeSupport
+                .removePropertyChangeListener(
+                        property, listener );
     }
+
 
     private void incrementSurroundingCellAt( int r, int c ) {
         if ( isCellInBoard( r, c ) && cells[r][c] != MINE ) {

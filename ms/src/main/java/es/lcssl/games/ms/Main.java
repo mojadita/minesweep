@@ -200,29 +200,33 @@ public class Main {
 //        System.out.println(board);
 
         /* register a loser callback */
-        board.addPropertyChangeListener( MineSweeper.PROPERTY_LOST, ev -> {
-                                     if ( (boolean) ev.getNewValue() ) {
-                                         chrono.stop();
-                                         JOptionPane.showMessageDialog(
-                                                 frame,
-                                                 intl.getString(
-                                                         "EXPLODED" ),
-                                                 intl.getString(
-                                                         "ERROR_MESSAGE" ),
-                                                 JOptionPane.ERROR_MESSAGE );
-                                     }
-                                 } );
+        board.addPropertyChangeListener(
+                MineSweeper.PROPERTY_LOST,
+                ev -> {
+            if ( (boolean) ev.getNewValue() ) {
+                chrono.stop();
+                String error_msg = intl.getString( "EXPLODED" );
+                JOptionPane.showMessageDialog(
+                        frame,
+                        intl.getString( "EXPLODED" ),
+                        error_msg,
+                        JOptionPane.ERROR_MESSAGE );
+                LOG.info( error_msg );
+            }
+        } );
 
         /* ... and a winner callback */
         board.addPropertyChangeListener(
                 MineSweeper.PROPERTY_WON,
                 ev -> {
             chrono.stop();
+            String success_msg = intl.getString( "SUCCESS" );
             JOptionPane.showMessageDialog(
                     frame,
                     intl.getString( "SUCCESS" ),
-                    intl.getString( "SUCCESS_MESSAGE" ),
+                    success_msg,
                     JOptionPane.INFORMATION_MESSAGE );
+            LOG.info( success_msg );
         } );
 
         /* ... chronograph set */
@@ -244,8 +248,9 @@ public class Main {
         String propertyName;
         MineSweeper board;
 
-        ChronoPropertyChangeListener( MineSweeper board, String property_name,
-                                      Runnable to_do ) {
+        ChronoPropertyChangeListener(
+                MineSweeper board, String property_name,
+                Runnable to_do ) {
             toDo = to_do;
             propertyName = property_name;
             this.board = board;

@@ -12,7 +12,7 @@
 
     <groupId>es.lcssl.games</groupId>
     <artifactId>ms</artifactId>
-    <version>1.2.2</version>
+    <version>1.3.0</version>
     <packaging>jar</packaging>
     <name>Mine Sweeper</name>
 
@@ -33,7 +33,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <exec.mainClass>es.lcssl.games.ms.Main</exec.mainClass>
-        <project.copyright>(C) 2023 Luis Colorado. Dedicated to Maela</project.copyright>
+        <project.copyright>(C) 2023 Luis Colorado</project.copyright>
     </properties>
 
     <dependencies>
