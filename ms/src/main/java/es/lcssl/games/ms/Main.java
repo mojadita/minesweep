@@ -31,6 +31,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -205,7 +206,7 @@ public class Main {
                 ev -> {
             if ( (boolean) ev.getNewValue() ) {
                 chrono.stop();
-                String error_msg = intl.getString( "EXPLODED" );
+                String error_msg = intl.getString( "ERROR_MESSAGE" );
                 JOptionPane.showMessageDialog(
                         frame,
                         intl.getString( "EXPLODED" ),
@@ -220,7 +221,7 @@ public class Main {
                 MineSweeper.PROPERTY_WON,
                 ev -> {
             chrono.stop();
-            String success_msg = intl.getString( "SUCCESS" );
+            String success_msg = intl.getString( "SUCCESS_MESSAGE" );
             JOptionPane.showMessageDialog(
                     frame,
                     intl.getString( "SUCCESS" ),
