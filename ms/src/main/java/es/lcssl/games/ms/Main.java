@@ -206,11 +206,11 @@ public class Main {
                 ev -> {
             if ( (boolean) ev.getNewValue() ) {
                 chrono.stop();
-                String error_msg = intl.getString( "ERROR_MESSAGE" );
+                String error_msg = intl.getString( "EXPLODED" );
                 JOptionPane.showMessageDialog(
                         frame,
-                        intl.getString( "EXPLODED" ),
                         error_msg,
+                        intl.getString( "ERROR_MESSAGE" ),
                         JOptionPane.ERROR_MESSAGE );
                 LOG.info( error_msg );
             }
@@ -221,11 +221,11 @@ public class Main {
                 MineSweeper.PROPERTY_WON,
                 ev -> {
             chrono.stop();
-            String success_msg = intl.getString( "SUCCESS_MESSAGE" );
+            String success_msg = intl.getString( "SUCCESS" );
             JOptionPane.showMessageDialog(
                     frame,
-                    intl.getString( "SUCCESS" ),
                     success_msg,
+                    intl.getString( "SUCCESS_MESSAGE" ),
                     JOptionPane.INFORMATION_MESSAGE );
             LOG.info( success_msg );
         } );
