@@ -112,7 +112,6 @@ public class Main {
         JMenuBar mb = new JMenuBar();
         frame.setJMenuBar( mb );
         JMenu file_menu = new JMenu( intl.getString( "FILE" ) );
-        HallOfFame hof = new HallOfFame();
 
         /* These {@link ValueField}s show the cells to go and
          * mines to go values.

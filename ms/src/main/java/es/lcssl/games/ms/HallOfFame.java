@@ -25,11 +25,8 @@
  */
 package es.lcssl.games.ms;
 
-import java.io.File;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
-import static java.text.MessageFormat.format;
 
 /**
  *
@@ -43,26 +40,7 @@ public class HallOfFame {
     private static final ResourceBundle INTL
             = ResourceBundle.getBundle( HallOfFame.class.getName() );
 
-    private static final String BASE_DIR_NAME
-            = INTL.getString( "HALL_OF_FAME_BASE_DIR" );
-
-    private static final File BASE_DIR
-            = new File( INTL.getString( BASE_DIR_NAME ) );
-
-    private static final File USER_SCORES
-            = new File( BASE_DIR,
-                    System.getProperty(
-                            "user.name", "user" ) );
-
-    public HallOfFame() {
-        LOG.info( format( "BASE_DIR: {0}", BASE_DIR ) );
-        LOG.info( format( "USER_SCORES: {0}", USER_SCORES ) );
-        if ( !BASE_DIR.isDirectory() ) {
-            String msg = format("{0} must be a directory", BASE_DIR_NAME);
-            LOG.warning( msg );
-            throw new NonDirectoryError(msg );
-        }
-        
+    public HallOfFame(String base_dir, String user) {
     }
 
 }

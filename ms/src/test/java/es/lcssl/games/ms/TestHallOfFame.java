@@ -25,10 +25,28 @@
  */
 package es.lcssl.games.ms;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Collection;
+
 /**
  *
  * @author lcu
  */
+@RunWith(Parameterized.class)
 public class TestHallOfFame {
+    
+    
+    
+    static final Object[][] test_cases = {
+        
+    };
+    
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> getParameters() {
+        
+    }
     
 }
