@@ -52,11 +52,11 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class Main {
 
-    private static final Logger LOG =
-            Logger.getLogger( Main.class.getName() );
+    private static final Logger LOG
+            = Logger.getLogger( Main.class.getName() );
 
-    private static final ResourceBundle intl =
-            getBundle( Main.class.getName() );
+    private static final ResourceBundle intl
+            = getBundle( Main.class.getName() );
 
     /**
      * Main program, it creates a JFrame with some interesting widgets to
@@ -86,21 +86,21 @@ public class Main {
 
         /* process program arguments */
         for ( int i = 0; i < args.length; i++ ) {
-            switch ( args[i] ) {
-            case "--rows":
-                rows = Integer.parseInt( args[++i] );
-                break;
-            case "--cols":
-                cols = Integer.parseInt( args[++i] );
-                break;
-            case "--prob":
-                prob = Double.parseDouble( args[++i] );
-                break;
-            default:
-                LOG.config( format(
-                        intl.getString( "INVALID_PARAMETER" ),
-                        i, args[i] ) );
-                break;
+            switch ( args[ i ] ) {
+                case "--rows":
+                    rows = Integer.parseInt( args[ ++i ] );
+                    break;
+                case "--cols":
+                    cols = Integer.parseInt( args[ ++i ] );
+                    break;
+                case "--prob":
+                    prob = Double.parseDouble( args[ ++i ] );
+                    break;
+                default:
+                    LOG.config( format(
+                            intl.getString( "INVALID_PARAMETER" ),
+                            i, args[ i ] ) );
+                    break;
             }
         }
 
@@ -176,6 +176,16 @@ public class Main {
             }
         } );
 
+        HallOfFame hall_of_fame = new HallOfFame(board,
+                intl.getString( "HALL_OF_FAME_BASE_DIR" ));
+
+        file_menu.add( new AbstractAction( intl.getString( "HALL_OF_FAME" ) ) {
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                hall_of_fame.setVisible( true);
+            }
+        } );
+
         /* Add a quit button */
         file_menu.add( new AbstractAction( intl.getString( "QUIT" ) ) {
             @Override
@@ -204,31 +214,31 @@ public class Main {
         board.addPropertyChangeListener(
                 MineSweeper.PROPERTY_LOST,
                 ev -> {
-            if ( (boolean) ev.getNewValue() ) {
-                chrono.stop();
-                String error_msg = intl.getString( "EXPLODED" );
-                JOptionPane.showMessageDialog(
-                        frame,
-                        error_msg,
-                        intl.getString( "ERROR_MESSAGE" ),
-                        JOptionPane.ERROR_MESSAGE );
-                LOG.info( error_msg );
-            }
-        } );
+                    if ( (boolean) ev.getNewValue() ) {
+                        chrono.stop();
+                        String error_msg = intl.getString( "EXPLODED" );
+                        JOptionPane.showMessageDialog(
+                                frame,
+                                error_msg,
+                                intl.getString( "ERROR_MESSAGE" ),
+                                JOptionPane.ERROR_MESSAGE );
+                        LOG.info( error_msg );
+                    }
+                } );
 
         /* ... and a winner callback */
         board.addPropertyChangeListener(
                 MineSweeper.PROPERTY_WON,
                 ev -> {
-            chrono.stop();
-            String success_msg = intl.getString( "SUCCESS" );
-            JOptionPane.showMessageDialog(
-                    frame,
-                    success_msg,
-                    intl.getString( "SUCCESS_MESSAGE" ),
-                    JOptionPane.INFORMATION_MESSAGE );
-            LOG.info( success_msg );
-        } );
+                    chrono.stop();
+                    String success_msg = intl.getString( "SUCCESS" );
+                    JOptionPane.showMessageDialog(
+                            frame,
+                            success_msg,
+                            intl.getString( "SUCCESS_MESSAGE" ),
+                            JOptionPane.INFORMATION_MESSAGE );
+                    LOG.info( success_msg );
+                } );
 
         /* ... chronograph set */
         board.addPropertyChangeListener(

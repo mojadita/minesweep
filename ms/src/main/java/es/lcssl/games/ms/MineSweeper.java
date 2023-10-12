@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -456,6 +457,14 @@ public class MineSweeper extends JPanel {
 
     public int getCellsToGo() {
         return cellsToGo;
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getCols() {
+        return cols;
     }
 
     public boolean isLost() {
