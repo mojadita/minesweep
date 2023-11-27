@@ -25,6 +25,8 @@
  */
 package es.lcssl.games.ms;
 
+import es.lcssl.games.ms.HallOfFameModel.Score;
+
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -238,9 +240,12 @@ public class Main {
                             intl.getString( "SUCCESS_MESSAGE" ),
                             JOptionPane.INFORMATION_MESSAGE );
                     LOG.info( success_msg );
-                    hall_of_fame.getModel().addScore(
+                    Score added = hall_of_fame.getModel().addScore(
                             System.currentTimeMillis(),
                             chrono.getTimeMillis());
+                    hall_of_fame.getList().setSelectedValue(
+                            added, true);
+                    hall_of_fame.pack();
                 } );
 
         /* ... chronograph set */

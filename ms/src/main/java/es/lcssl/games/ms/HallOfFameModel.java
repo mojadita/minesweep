@@ -211,7 +211,7 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
         return scores.get( index );
     }
 
-    public void addScore(long when, long score) {
+    public Score addScore(long when, long score) {
         Score new_score = new Score(when, score);
         int lft = 0, rgt = scores.size();
         while (rgt - lft > 1) {
@@ -236,5 +236,6 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
 
         scores.add(lft, new_score);
         fireIntervalAdded( this, lft, lft);
+        return new_score;
     }
 }

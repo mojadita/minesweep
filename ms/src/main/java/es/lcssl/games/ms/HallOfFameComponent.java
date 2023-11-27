@@ -25,6 +25,7 @@
  */
 package es.lcssl.games.ms;
 
+import java.awt.BorderLayout;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -33,6 +34,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.BevelBorder;
 
 import static java.text.MessageFormat.format;
@@ -49,7 +51,8 @@ public class HallOfFameComponent extends JFrame {
     private static final ResourceBundle INTL
             = ResourceBundle.getBundle(HallOfFameComponent.class.getName() );
 
-    final HallOfFameModel model;
+    protected final HallOfFameModel model;
+    protected final JList list;
 
     public HallOfFameComponent( MineSweeper ms, String base_dir ) {
         super( format( INTL.getString(
@@ -57,13 +60,18 @@ public class HallOfFameComponent extends JFrame {
                 ms.getRows(),
                 ms.getCols(),
                 ms.getMinesToMark() ) );
-        JPanel panel = new JPanel();
-        panel.add( new JLabel(getTitle() ));
-        JList list = new JList<>( model = new HallOfFameModel(
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add( new JLabel(format(INTL.getString(
+                "HALL_OF_FAME_DIALOG_HEADER"),
+                ms.getRows(),
+                ms.getCols(),
+                ms.getMinesToMark()) ), BorderLayout.NORTH);
+        list = new JList<>( model = new HallOfFameModel(
                 ms, base_dir ) );
+        list.setSelectionMode( ListSelectionModel.SINGLE_SELECTION);
         list.setBorder( BorderFactory.createBevelBorder(
                 BevelBorder.LOWERED));
-        panel.add( list );
+        panel.add( list, BorderLayout.CENTER );
         add(panel);
         pack();
     }
@@ -71,4 +79,9 @@ public class HallOfFameComponent extends JFrame {
     public HallOfFameModel getModel() {
         return model;
     }
+
+    public JList getList() {
+        return list;
+    }
+
 }
