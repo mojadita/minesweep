@@ -176,7 +176,7 @@ public class Main {
             }
         } );
 
-        HallOfFame hall_of_fame = new HallOfFame(board,
+        final HallOfFameComponent hall_of_fame = new HallOfFameComponent(board,
                 intl.getString( "HALL_OF_FAME_BASE_DIR" ));
 
         file_menu.add( new AbstractAction( intl.getString( "HALL_OF_FAME" ) ) {
@@ -238,6 +238,9 @@ public class Main {
                             intl.getString( "SUCCESS_MESSAGE" ),
                             JOptionPane.INFORMATION_MESSAGE );
                     LOG.info( success_msg );
+                    hall_of_fame.getModel().addScore(
+                            System.currentTimeMillis(),
+                            chrono.getTimeMillis());
                 } );
 
         /* ... chronograph set */
