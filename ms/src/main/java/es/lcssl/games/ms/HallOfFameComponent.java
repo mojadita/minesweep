@@ -34,6 +34,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.BevelBorder;
 
@@ -46,10 +47,10 @@ import static java.text.MessageFormat.format;
 public class HallOfFameComponent extends JFrame {
 
     private static final Logger LOG
-            = Logger.getLogger(HallOfFameComponent.class.getName() );
+            = Logger.getLogger( HallOfFameComponent.class.getName() );
 
     private static final ResourceBundle INTL
-            = ResourceBundle.getBundle(HallOfFameComponent.class.getName() );
+            = ResourceBundle.getBundle( HallOfFameComponent.class.getName() );
 
     protected final HallOfFameModel model;
     protected final JList list;
@@ -60,19 +61,24 @@ public class HallOfFameComponent extends JFrame {
                 ms.getRows(),
                 ms.getCols(),
                 ms.getMinesToMark() ) );
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add( new JLabel(format(INTL.getString(
-                "HALL_OF_FAME_DIALOG_HEADER"),
+        JPanel panel = new JPanel( new BorderLayout() );
+        JLabel label = new JLabel( format( INTL.getString(
+                "HALL_OF_FAME_DIALOG_HEADER" ),
                 ms.getRows(),
                 ms.getCols(),
-                ms.getMinesToMark()) ), BorderLayout.NORTH);
+                ms.getMinesToMark() ) );
+        label.setAlignmentX( 0.5F);
+        panel.add( label, BorderLayout.NORTH );
         list = new JList<>( model = new HallOfFameModel(
                 ms, base_dir ) );
-        list.setSelectionMode( ListSelectionModel.SINGLE_SELECTION);
+        list.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
+        list.setDragEnabled( false );
+        //list.setEnabled( false );
         list.setBorder( BorderFactory.createBevelBorder(
-                BevelBorder.LOWERED));
-        panel.add( list, BorderLayout.CENTER );
-        add(panel);
+                BevelBorder.LOWERED ) );
+        JScrollPane scroll_pane = new JScrollPane(list );
+        panel.add( scroll_pane, BorderLayout.CENTER );
+        add( panel );
         pack();
     }
 

@@ -233,19 +233,23 @@ public class Main {
                 MineSweeper.PROPERTY_WON,
                 ev -> {
                     chrono.stop();
-                    String success_msg = intl.getString( "SUCCESS" );
-                    JOptionPane.showMessageDialog(
-                            frame,
-                            success_msg,
-                            intl.getString( "SUCCESS_MESSAGE" ),
-                            JOptionPane.INFORMATION_MESSAGE );
-                    LOG.info( success_msg );
                     Score added = hall_of_fame.getModel().addScore(
                             System.currentTimeMillis(),
                             chrono.getTimeMillis());
                     hall_of_fame.getList().setSelectedValue(
                             added, true);
                     hall_of_fame.pack();
+
+                    String success_msg = format(intl.getString( "SUCCESS" ),
+                            added.getPosition(),
+                            added.getScoreAsString(),
+                            added.getWhenAsString());
+                    JOptionPane.showMessageDialog(
+                            frame,
+                            success_msg,
+                            intl.getString( "SUCCESS_MESSAGE" ),
+                            JOptionPane.INFORMATION_MESSAGE );
+                    LOG.info( success_msg );
                 } );
 
         /* ... chronograph set */

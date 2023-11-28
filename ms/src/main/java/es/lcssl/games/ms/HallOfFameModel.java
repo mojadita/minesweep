@@ -222,20 +222,26 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
                 lft = mid;
             }
         }
-        /* rgt - lft <= 1 */
-        LOG.info( format(
-                "left({0}, {1}), right({2}, {3})",
-                lft,
-                lft < scores.size()
-                        ? scores.get( lft)
-                        : "<null>",
-                rgt,
-                rgt < scores.size()
-                        ? scores.get( rgt)
-                        : "<null>"));
-
-        scores.add(lft, new_score);
-        fireIntervalAdded( this, lft, lft);
+        if (lft == rgt) { /* scores is empty */
+            new_score.setPosition( 1);
+            scores.add(0, new_score);
+            fireIntervalAdded( this, 0, 0);
+        } else { /* not empty */
+            int cmp = new_score.compareTo( scores.get( lft));
+            if (cmp < 0) { /* less than */
+                addTheScore(lft, new_score);
+            } else if (cmp > 0) { /* larger */
+                addTheScore(rgt, new_score);
+            } /* else nothing */
+        }
         return new_score;
+    }
+    private void addTheScore(int where, Score score) {
+        scores.add(where, score);
+        int size = scores.size();
+        for (int i = where, pos = i+1; i < size; i++, pos++) {
+            scores.get( i ).setPosition( pos);
+        }
+        fireContentsChanged( this, where, size-1);
     }
 }
