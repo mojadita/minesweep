@@ -25,12 +25,20 @@
  */
 package es.lcssl.games.ms;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -84,7 +92,7 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
         }
 
         public String getWhenAsString() {
-            return new Date(when).toString();
+            return new Date( when ).toString();
         }
 
         public String getScoreAsString() {
@@ -110,10 +118,10 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
                 return res;
             }
             res = Long.compare( when, o.when );
-            if (res != 0) {
+            if ( res != 0 ) {
                 return res;
             }
-            return who.compareTo( o.getWho());
+            return who.compareTo( o.getWho() );
         }
 
         @Override
@@ -123,7 +131,31 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
                     getPosition(),
                     getWho(),
                     getScoreAsString(),
-                    getWhenAsString());
+                    getWhenAsString() );
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 97 * hash + Objects.hashCode( this.who );
+            hash = 97 * hash + (int) (this.when ^ (this.when >>> 32));
+            hash = 97 * hash + (int) (this.score ^ (this.score >>> 32));
+            return hash;
+        }
+
+        @Override
+        public boolean equals( Object obj ) {
+            if ( this == obj ) {
+                return true;
+            }
+            if ( obj == null || getClass() != obj.getClass() ) {
+                return false;
+            }
+
+            final Score other = (Score) obj;
+            return this.when != other.when
+                    && this.score != other.score
+                    && Objects.equals( this.who, other.who );
         }
     }
 
@@ -139,7 +171,7 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
 
         final Pattern pattern
                 = Pattern.compile( format(
-                        "{0}x{1}-M={2}-O=(.*)\\.score",
+                        "{0}x{1}-M={2}-O:(.*)\\.score",
                         ms.getRows(),
                         ms.getCols(),
                         ms.getMinesToMark() ) );
@@ -152,53 +184,90 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
         LOG.info( format(
                 "scoreFile = {0}",
                 scoreFile ) );
-//        try {
-//            for ( File f : baseDirectory.listFiles( fnm ) ) {
-//                LOG.info( () -> format( INTL.getString(
-//                        "READING_FROM_FILE" ),
-//                        f.getName() ) );
-//                Properties props = new Properties();
-//                try  {
-//                    props.load( new BufferedInputStream(new FileInputStream(f)));
-//                } catch ( IOException ex ) {
-//                    LOG.warning( () -> format(
-//                            INTL.getString( "LOAD_ERROR" ),
-//                            f,
-//                            ex ) );
-//                    continue;
-//                }
-//
-//                props.forEach( (key, val) -> {
-//                    long score = Long.parseLong( (String) key );
-//                    String[] fields = ((String) val)
-//                            .split( "\\s*(,\\s*|\\s+)" );
-//                    if ( fields.length != 3 ) {
-//                        LOG.warning( () -> format(
-//                                "ERROR_PARSING_{0}_{1}_{2}",
-//                                f, key, val ) );
-//                        return;
-//                    }
-//                    String name = fields[ 0 ];
-//                    long when = Long.parseLong( fields[ 1 ] );
-//                    int read_hash = Integer.parseInt( fields[ 2 ] );
-//                    Score sc = new Score( name, when, score );
-//                    int expected = sc.hashCode();
-//                    if ( read_hash != expected ) {
-//                        LOG.warning( () -> format(
-//                                "HASH_FAILURE_{0}_{1}_{2}_{3}",
-//                                f, key, val,
-//                                read_hash, expected ) );
-//                        return;
-//                    }
-//                    scores.add( sc );
-//                } );
-//                scores.sort(Score::compareTo);
-//            }
-//        } catch ( NullPointerException ex ) {
-//            LOG.warning( format(
-//                    INTL.getString( "CANNOT_READ_BASE_DIR" ),
-//                    baseDirectory ) );
-//        }
+        scores = new ArrayList<>();
+        try {
+            for ( File f : baseDirectory.listFiles( fnm ) ) {
+                LOG.info( () -> format( INTL.getString(
+                        "READING_FROM_FILE" ),
+                        f.getName() ) );
+                try ( Scanner in = new Scanner(
+                        new BufferedInputStream(
+                                new FileInputStream( f ) ) ) ) {
+                    final int n_args = 4;
+                    int line_no = 0;
+                    while ( in.hasNext() ) {
+                        String line = in.nextLine();
+                        final int ln = ++line_no;
+                        String[] args = line.split( "[ \t]*:[ \t]*" );
+                        if ( args.length != n_args ) {
+                            LOG.warning( () -> format(
+                                    INTL.getString( "BAD_SYNTAX" ),
+                                    ln,
+                                    line ) );
+                            continue;
+                        }
+                        try {
+                            Score score = new Score(
+                                    args[ 0 ],
+                                    Long.parseLong( args[ 1 ] ),
+                                    Long.parseLong( args[ 2 ] ) );
+                            int hash = score.hashCode(), hash_read = Integer.parseInt( args[ 3 ] );
+                            if ( hash != hash_read ) {
+                                LOG.warning( () -> format(
+                                        INTL.getString( "BAD_HASH" ),
+                                        ln,
+                                        hash_read,
+                                        hash ) );
+                                continue;
+                            }
+                            scores.add( score );
+                        } catch ( NumberFormatException ex ) {
+                            LOG.warning( () -> format(
+                                    INTL.getString( "NUMBER_FORMAT" ),
+                                    ln,
+                                    line,
+                                    ex ) );
+                            continue;
+                        }
+                    }
+                } catch ( FileNotFoundException ex ) {
+                    LOG.warning( () -> format(
+                            INTL.getString(
+                                    "FILE_NOT_FOUND" ),
+                            f,
+                            ex ) );
+                } catch ( IOException ex ) {
+                    LOG.warning( () -> format(
+                            INTL.getString(
+                                    "LOAD_ERROR" ),
+                            f,
+                            ex ) );
+                }
+                scores.sort( Score::compareTo );
+                int pos = 1;
+                for ( Score s : scores ) {
+                    s.setPosition( pos++ );
+                }
+            }
+        } catch ( NullPointerException ex ) {
+            LOG.warning( format(
+                    INTL.getString( "CANNOT_READ_BASE_DIR" ),
+                    baseDirectory ) );
+        }
+    }
+
+    public void save() throws FileNotFoundException, IOException {
+        try ( OutputStreamWriter out = new OutputStreamWriter(
+                new FileOutputStream( scoreFile ) ) ) {
+            for ( Score s : scores ) {
+                out.write( format(
+                        "{0}:{1,number,0}:{2,number,0}:{3,number,0}\n",
+                        s.getWho(),
+                        s.getWhen(),
+                        s.getScore(),
+                        s.hashCode() ) );
+            }
+        }
     }
 
     @Override
@@ -211,37 +280,43 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
         return scores.get( index );
     }
 
-    public Score addScore(long when, long score) {
-        Score new_score = new Score(when, score);
+    public Score addScore( long when, long score ) {
+        Score new_score = new Score( when, score );
         int lft = 0, rgt = scores.size();
-        while (rgt - lft > 1) {
+        while ( rgt - lft > 1 ) {
             int mid = (lft + rgt) / 2;
-            if (new_score.compareTo( scores.get( mid)) < 0) {
+            if ( new_score.compareTo( scores.get( mid ) ) < 0 ) {
                 rgt = mid;
             } else {
                 lft = mid;
             }
         }
-        if (lft == rgt) { /* scores is empty */
-            new_score.setPosition( 1);
-            scores.add(0, new_score);
-            fireIntervalAdded( this, 0, 0);
-        } else { /* not empty */
-            int cmp = new_score.compareTo( scores.get( lft));
-            if (cmp < 0) { /* less than */
-                addTheScore(lft, new_score);
-            } else if (cmp > 0) { /* larger */
-                addTheScore(rgt, new_score);
-            } /* else nothing */
+        if ( lft == rgt ) {
+            /* scores is empty */
+            new_score.setPosition( 1 );
+            scores.add( 0, new_score );
+            fireIntervalAdded( this, 0, 0 );
+        } else {
+            /* not empty */
+            int cmp = new_score.compareTo( scores.get( lft ) );
+            if ( cmp < 0 ) {
+                /* less than */
+                addTheScore( lft, new_score );
+            } else if ( cmp > 0 ) {
+                /* larger */
+                addTheScore( rgt, new_score );
+            }
+            /* else nothing */
         }
         return new_score;
     }
-    private void addTheScore(int where, Score score) {
-        scores.add(where, score);
+
+    private void addTheScore( int where, Score score ) {
+        scores.add( where, score );
         int size = scores.size();
-        for (int i = where, pos = i+1; i < size; i++, pos++) {
-            scores.get( i ).setPosition( pos);
+        for ( int i = where, pos = i + 1; i < size; i++, pos++ ) {
+            scores.get( i ).setPosition( pos );
         }
-        fireContentsChanged( this, where, size-1);
+        fireContentsChanged( this, where, size - 1 );
     }
 }

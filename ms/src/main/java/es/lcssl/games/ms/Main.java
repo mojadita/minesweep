@@ -31,11 +31,13 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
@@ -57,7 +59,7 @@ public class Main {
     private static final Logger LOG
             = Logger.getLogger( Main.class.getName() );
 
-    private static final ResourceBundle intl
+    private static final ResourceBundle INTL
             = getBundle( Main.class.getName() );
 
     /**
@@ -100,35 +102,35 @@ public class Main {
                     break;
                 default:
                     LOG.config( format(
-                            intl.getString( "INVALID_PARAMETER" ),
+                            INTL.getString( "INVALID_PARAMETER" ),
                             i, args[ i ] ) );
                     break;
             }
         }
 
-        JFrame frame = new JFrame( intl.getString( "TITLE" ) );
+        JFrame frame = new JFrame( INTL.getString( "TITLE" ) );
 
         // this is the MineSweeper board
         MineSweeper board = new MineSweeper( rows, cols, prob );
         JScrollPane sp = new JScrollPane( board );
         JMenuBar mb = new JMenuBar();
         frame.setJMenuBar( mb );
-        JMenu file_menu = new JMenu( intl.getString( "FILE" ) );
+        JMenu file_menu = new JMenu( INTL.getString( "FILE" ) );
 
         /* These {@link ValueField}s show the cells to go and
          * mines to go values.
          */
         ValueField places_to_go = new ValueField(
-                intl.getString( "CELLS" ),
-                intl.getString( "FORMAT_CELLS" ),
+                INTL.getString( "CELLS" ),
+                INTL.getString( "FORMAT_CELLS" ),
                 board.getCellsToGo() );
         board.addPropertyChangeListener(
                 MineSweeper.PROPERTY_CELLS_TO_GO,
                 places_to_go );
 
         ValueField mines_to_guard = new ValueField(
-                intl.getString( "MINES" ),
-                intl.getString( "FORMAT_MINES" ),
+                INTL.getString( "MINES" ),
+                INTL.getString( "FORMAT_MINES" ),
                 board.getMinesToMark() );
 
         board.addPropertyChangeListener(
@@ -137,8 +139,8 @@ public class Main {
 
         Chronograph chrono = new Chronograph();
         ValueField time = new ValueField(
-                intl.getString( "TIME" ),
-                intl.getString( "FORMAT_TIME" ),
+                INTL.getString( "TIME" ),
+                INTL.getString( "FORMAT_TIME" ),
                 chrono );
 
         chrono.addValueChangeListener(
@@ -146,7 +148,7 @@ public class Main {
 
 
         /* add a reset menu option */
-        file_menu.add( new AbstractAction( intl.getString( "RE-INIT" ) ) {
+        file_menu.add( new AbstractAction( INTL.getString( "RE-INIT" ) ) {
             @Override
             public void actionPerformed( ActionEvent e ) {
                 EventQueue.invokeLater( () -> {
@@ -179,9 +181,9 @@ public class Main {
         } );
 
         final HallOfFameComponent hall_of_fame = new HallOfFameComponent(board,
-                intl.getString( "HALL_OF_FAME_BASE_DIR" ));
+                INTL.getString( "HALL_OF_FAME_BASE_DIR" ));
 
-        file_menu.add( new AbstractAction( intl.getString( "HALL_OF_FAME" ) ) {
+        file_menu.add( new AbstractAction( INTL.getString( "HALL_OF_FAME" ) ) {
             @Override
             public void actionPerformed( ActionEvent e ) {
                 hall_of_fame.setVisible( true);
@@ -189,10 +191,17 @@ public class Main {
         } );
 
         /* Add a quit button */
-        file_menu.add( new AbstractAction( intl.getString( "QUIT" ) ) {
+        file_menu.add( new AbstractAction( INTL.getString( "QUIT" ) ) {
             @Override
             public void actionPerformed( ActionEvent e ) {
                 EventQueue.invokeLater( () -> {
+                    try {
+                    hall_of_fame.getModel().save();
+                    } catch (IOException ex) {
+                        LOG.warning(() -> format(
+                                INTL.getString( "WRITE_ERROR"),
+                                ex));
+                    }
                     System.exit( 0 );
                 } );
             }
@@ -218,11 +227,11 @@ public class Main {
                 ev -> {
                     if ( (boolean) ev.getNewValue() ) {
                         chrono.stop();
-                        String error_msg = intl.getString( "EXPLODED" );
+                        String error_msg = INTL.getString( "EXPLODED" );
                         JOptionPane.showMessageDialog(
                                 frame,
                                 error_msg,
-                                intl.getString( "ERROR_MESSAGE" ),
+                                INTL.getString( "ERROR_MESSAGE" ),
                                 JOptionPane.ERROR_MESSAGE );
                         LOG.info( error_msg );
                     }
@@ -236,18 +245,20 @@ public class Main {
                     Score added = hall_of_fame.getModel().addScore(
                             System.currentTimeMillis(),
                             chrono.getTimeMillis());
-                    hall_of_fame.getList().setSelectedValue(
-                            added, true);
-                    hall_of_fame.pack();
+                    int idx = added.getPosition()-1;
+                    JList list = hall_of_fame.getList();
+                    list.setSelectedIndex(idx);
+                    list.ensureIndexIsVisible( idx);
 
-                    String success_msg = format(intl.getString( "SUCCESS" ),
+                    String success_msg = format(
+                            INTL.getString( "SUCCESS" ),
                             added.getPosition(),
                             added.getScoreAsString(),
                             added.getWhenAsString());
                     JOptionPane.showMessageDialog(
                             frame,
                             success_msg,
-                            intl.getString( "SUCCESS_MESSAGE" ),
+                            INTL.getString( "SUCCESS_MESSAGE" ),
                             JOptionPane.INFORMATION_MESSAGE );
                     LOG.info( success_msg );
                 } );
