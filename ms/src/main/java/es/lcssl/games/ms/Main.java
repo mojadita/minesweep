@@ -31,7 +31,8 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
+import java.io.File;
+import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -48,7 +49,8 @@ import static java.text.MessageFormat.format;
 import static java.util.ResourceBundle.getBundle;
 
 /**
- * Main class providing a frame and using the {@link MineSweeper} widget to
+ * Main class providing a frame and using the {@link MineSweeper} widget
+ * to
  * play
  * mine hunting.
  *
@@ -63,25 +65,33 @@ public class Main {
             = getBundle( Main.class.getName() );
 
     /**
-     * Main program, it creates a JFrame with some interesting widgets to
+     * Main program, it creates a JFrame with some interesting widgets
+     * to
      * obtain
-     * information about the {@link MineSweeper} board, and how the values are
+     * information about the {@link MineSweeper} board, and how the
+     * values are
      * calculated.
      *
-     * @param args parameterized options {@code --rows}, {@code --cols} and
-     *             {@code --prob} are used to indicate grid rows number, grid columns
+     * @param args parameterized options {@code --rows}, {@code --cols}
+     *             and
+     *             {@code --prob} are used to indicate grid rows number, grid
+     *             columns
      *             number
-     *             and mine probability (as a number between 0 and 100) for each grid.
+     *             and mine probability (as a number between 0 and 100) for each
+     *             grid.
      *             This
-     *             last parameter is used to generate the number of cells to populate with
+     *             last parameter is used to generate the number of cells to
+     *             populate with
      *             a
      *             mine, and that number of mines is actually generated (so once
      *             calculated,
      *             exactly that number of mines is actually placed on the board)
      *             Parameters
-     *             default to {@link MineSweeper#DEFAULT_ROWS} for the rows number; to
+     *             default to {@link MineSweeper#DEFAULT_ROWS} for the rows number;
+     *             to
      *             {@link MineSweeper#DEFAULT_COLS} for the columns number, and to
-     *             {@link MineSweeper#DEFAULT_PROB} for the number of mines calculation.
+     *             {@link MineSweeper#DEFAULT_PROB} for the number of mines
+     *             calculation.
      *
      */
     public static void main( String[] args ) {
@@ -91,20 +101,20 @@ public class Main {
         /* process program arguments */
         for ( int i = 0; i < args.length; i++ ) {
             switch ( args[ i ] ) {
-                case "--rows":
-                    rows = Integer.parseInt( args[ ++i ] );
-                    break;
-                case "--cols":
-                    cols = Integer.parseInt( args[ ++i ] );
-                    break;
-                case "--prob":
-                    prob = Double.parseDouble( args[ ++i ] );
-                    break;
-                default:
-                    LOG.config( format(
-                            INTL.getString( "INVALID_PARAMETER" ),
-                            i, args[ i ] ) );
-                    break;
+            case "--rows":
+                rows = Integer.parseInt( args[ ++i ] );
+                break;
+            case "--cols":
+                cols = Integer.parseInt( args[ ++i ] );
+                break;
+            case "--prob":
+                prob = Double.parseDouble( args[ ++i ] );
+                break;
+            default:
+                LOG.config( format(
+                        INTL.getString( "INVALID_PARAMETER" ),
+                        i, args[ i ] ) );
+                break;
             }
         }
 
@@ -180,13 +190,13 @@ public class Main {
             }
         } );
 
-        final HallOfFameComponent hall_of_fame = new HallOfFameComponent(board,
-                INTL.getString( "HALL_OF_FAME_BASE_DIR" ));
+        final HallOfFameComponent hall_of_fame = new HallOfFameComponent( board,
+                new File(INTL.getString( "HALL_OF_FAME_BASE_DIR" )) );
 
         file_menu.add( new AbstractAction( INTL.getString( "HALL_OF_FAME" ) ) {
             @Override
             public void actionPerformed( ActionEvent e ) {
-                hall_of_fame.setVisible( true);
+                hall_of_fame.setVisible( true );
             }
         } );
 
@@ -195,13 +205,10 @@ public class Main {
             @Override
             public void actionPerformed( ActionEvent e ) {
                 EventQueue.invokeLater( () -> {
-                    try {
-                    hall_of_fame.getModel().save();
-                    } catch (IOException ex) {
-                        LOG.warning(() -> format(
-                                INTL.getString( "WRITE_ERROR"),
-                                ex));
-                    }
+                    LOG.warning( () -> format(
+                            INTL.getString( "EXITING" ),
+                            new Date() ) );
+
                     System.exit( 0 );
                 } );
             }
@@ -243,18 +250,19 @@ public class Main {
                 ev -> {
                     chrono.stop();
                     Score added = hall_of_fame.getModel().addScore(
-                            System.currentTimeMillis(),
-                            chrono.getTimeMillis());
-                    int idx = added.getPosition()-1;
+                                System.currentTimeMillis(),
+                                chrono.getTimeMillis() );
+                    int idx = added.getPosition() - 1;
                     JList list = hall_of_fame.getList();
-                    list.setSelectedIndex(idx);
-                    list.ensureIndexIsVisible( idx);
+                    list.setSelectedIndex( idx );
+                    list.ensureIndexIsVisible( idx );
 
                     String success_msg = format(
                             INTL.getString( "SUCCESS" ),
                             added.getPosition(),
                             added.getScoreAsString(),
-                            added.getWhenAsString());
+                            added.getWhenAsString() );
+
                     JOptionPane.showMessageDialog(
                             frame,
                             success_msg,

@@ -29,7 +29,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -50,19 +50,30 @@ import static java.text.MessageFormat.format;
  *
  * @author lcu
  */
-public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
+public class HallOfFameModel
+        extends AbstractListModel<HallOfFameModel.Score> {
 
     private static final Logger LOG
             = Logger.getLogger( HallOfFameModel.class.getName() );
 
     private static final ResourceBundle INTL
-            = ResourceBundle.getBundle( HallOfFameModel.class.getName() );
+            = ResourceBundle.getBundle(
+                    HallOfFameModel.class.getName() );
 
     private static final String WHO_AM_I
             = System.getProperty( "user.name" );
 
-    private File baseDirectory;
-    private File scoreFile;
+    private static final String SEARCH_SCORE_PATTERN
+            = "{0}x{1}-M={2}-O:(.*)\\.score";
+    private static final String SCORE_FILE_FORMAT
+            = "{0}x{1}-M={2}-O:{3}.score";
+    private static final String SCORE_LINE_FORMAT
+            = "{0}:{1,number,0}:{2,number,0}:{3,number,0}\n";
+
+    private final File baseDirectory;
+    private final File scoreFile;
+    private OutputStreamWriter out;
+    private final FilenameFilter filenameFilter;
 
     ArrayList<Score> scores = new ArrayList<>();
 
@@ -131,7 +142,8 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
                     getPosition(),
                     getWho(),
                     getScoreAsString(),
-                    getWhenAsString() );
+                    getWhenAsString(),
+                    hashCode() );
         }
 
         @Override
@@ -159,23 +171,29 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
         }
     }
 
-    public HallOfFameModel( MineSweeper ms, String base_dir ) {
+    public HallOfFameModel( MineSweeper ms, File base_dir ) {
 
-        baseDirectory = new File( base_dir );
+        baseDirectory = base_dir;
         scoreFile = new File( baseDirectory,
-                format( "{0}x{1}-M={2}-O:{3}.score",
+                format( SCORE_FILE_FORMAT,
                         ms.getRows(),
                         ms.getCols(),
                         ms.getMinesToMark(),
                         WHO_AM_I ) );
-
-        final Pattern pattern
-                = Pattern.compile( format(
-                        "{0}x{1}-M={2}-O:(.*)\\.score",
+        try {
+            out = new FileWriter(scoreFile,true );
+        } catch ( IOException ex ) {
+            LOG.warning( () -> format(
+                    INTL.getString( "CANNOT_OPEN_SCORES_FILE" ),
+                    scoreFile,
+                    ex ) );
+        }
+        filenameFilter = (d, n) -> Pattern.compile(
+                format(
+                        SEARCH_SCORE_PATTERN,
                         ms.getRows(),
                         ms.getCols(),
-                        ms.getMinesToMark() ) );
-        FilenameFilter fnm = (d, n) -> pattern
+                        ms.getMinesToMark() ) )
                 .matcher( n ).matches();
 
         LOG.info( format(
@@ -184,9 +202,16 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
         LOG.info( format(
                 "scoreFile = {0}",
                 scoreFile ) );
+        load();
+    }
+
+    public final void load() {
+
         scores = new ArrayList<>();
-        try {
-            for ( File f : baseDirectory.listFiles( fnm ) ) {
+
+        File[] files = baseDirectory.listFiles( filenameFilter );
+        if ( files != null ) {
+            for ( File f : files ) {
                 LOG.info( () -> format( INTL.getString(
                         "READING_FROM_FILE" ),
                         f.getName() ) );
@@ -198,10 +223,12 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
                     while ( in.hasNext() ) {
                         String line = in.nextLine();
                         final int ln = ++line_no;
-                        String[] args = line.split( "[ \t]*:[ \t]*" );
-                        if ( args.length != n_args ) {
+                        String[] args
+                                = line.split( "[ \t]*:[ \t]*" );
+                        if ( args.length < n_args ) {
                             LOG.warning( () -> format(
-                                    INTL.getString( "BAD_SYNTAX" ),
+                                    INTL.getString(
+                                            "BAD_SYNTAX" ),
                                     ln,
                                     line ) );
                             continue;
@@ -211,23 +238,25 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
                                     args[ 0 ],
                                     Long.parseLong( args[ 1 ] ),
                                     Long.parseLong( args[ 2 ] ) );
-                            int hash = score.hashCode(), hash_read = Integer.parseInt( args[ 3 ] );
+                            int hash = score.hashCode(),
+                                    hash_read = Integer.parseInt(
+                                            args[ 3 ] );
                             if ( hash != hash_read ) {
                                 LOG.warning( () -> format(
-                                        INTL.getString( "BAD_HASH" ),
+                                        INTL.getString(
+                                                "BAD_HASH" ),
                                         ln,
                                         hash_read,
                                         hash ) );
-                                continue;
+                            } else {
+                                scores.add( score );
                             }
-                            scores.add( score );
                         } catch ( NumberFormatException ex ) {
                             LOG.warning( () -> format(
                                     INTL.getString( "NUMBER_FORMAT" ),
                                     ln,
                                     line,
                                     ex ) );
-                            continue;
                         }
                     }
                 } catch ( FileNotFoundException ex ) {
@@ -236,36 +265,12 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
                                     "FILE_NOT_FOUND" ),
                             f,
                             ex ) );
-                } catch ( IOException ex ) {
-                    LOG.warning( () -> format(
-                            INTL.getString(
-                                    "LOAD_ERROR" ),
-                            f,
-                            ex ) );
                 }
                 scores.sort( Score::compareTo );
                 int pos = 1;
                 for ( Score s : scores ) {
                     s.setPosition( pos++ );
                 }
-            }
-        } catch ( NullPointerException ex ) {
-            LOG.warning( format(
-                    INTL.getString( "CANNOT_READ_BASE_DIR" ),
-                    baseDirectory ) );
-        }
-    }
-
-    public void save() throws FileNotFoundException, IOException {
-        try ( OutputStreamWriter out = new OutputStreamWriter(
-                new FileOutputStream( scoreFile ) ) ) {
-            for ( Score s : scores ) {
-                out.write( format(
-                        "{0}:{1,number,0}:{2,number,0}:{3,number,0}\n",
-                        s.getWho(),
-                        s.getWhen(),
-                        s.getScore(),
-                        s.hashCode() ) );
             }
         }
     }
@@ -308,6 +313,21 @@ public class HallOfFameModel extends AbstractListModel<HallOfFameModel.Score> {
             }
             /* else nothing */
         }
+        try {
+            out.write(format(
+                    SCORE_LINE_FORMAT,
+                    new_score.getWho(),
+                    new_score.getWhen(),
+                    new_score.getScore(),
+                    new_score.hashCode() ));
+            out.flush();
+        } catch ( IOException ex ) {
+            LOG.warning( () -> format(
+                    INTL.getString(
+                            "FORMAT_CANNOT_WRITE_SCORE" ),
+                    ex ) );
+        }
+
         return new_score;
     }
 

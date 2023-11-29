@@ -26,6 +26,7 @@
 package es.lcssl.games.ms;
 
 import java.awt.BorderLayout;
+import java.io.File;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -55,7 +56,7 @@ public class HallOfFameComponent extends JFrame {
     protected final HallOfFameModel model;
     protected final JList list;
 
-    public HallOfFameComponent( MineSweeper ms, String base_dir ) {
+    public HallOfFameComponent( MineSweeper ms, File base_dir ) {
         super( format( INTL.getString(
                 "HALL_OF_FAME_DIALOG_NAME" ),
                 ms.getRows(),
