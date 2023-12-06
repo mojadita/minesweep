@@ -257,18 +257,20 @@ public class Main {
                     list.setSelectedIndex( idx );
                     list.ensureIndexIsVisible( idx );
 
-                    String success_msg = format(
+                    JOptionPane.showMessageDialog(
+                            frame,
+                            format(
                             INTL.getString( "SUCCESS" ),
                             added.getPosition(),
                             added.getScoreAsString(),
-                            added.getWhenAsString() );
-
-                    JOptionPane.showMessageDialog(
-                            frame,
-                            success_msg,
+                            added.getWhenAsString() ),
                             INTL.getString( "SUCCESS_MESSAGE" ),
                             JOptionPane.INFORMATION_MESSAGE );
-                    LOG.info( success_msg );
+                    LOG.info( format(
+                            INTL.getString( "SUCCESS_LOG" ),
+                            added.getPosition(),
+                            added.getScoreAsString(),
+                            added.getWhenAsString() ) );
                 } );
 
         /* ... chronograph set */
