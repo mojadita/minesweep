@@ -235,12 +235,12 @@ public class Main {
                     if ( (boolean) ev.getNewValue() ) {
                         chrono.stop();
                         String error_msg = INTL.getString( "EXPLODED" );
+                        LOG.info( error_msg );
                         JOptionPane.showMessageDialog(
                                 frame,
                                 error_msg,
                                 INTL.getString( "ERROR_MESSAGE" ),
                                 JOptionPane.ERROR_MESSAGE );
-                        LOG.info( error_msg );
                     }
                 } );
 
@@ -257,6 +257,11 @@ public class Main {
                     list.setSelectedIndex( idx );
                     list.ensureIndexIsVisible( idx );
 
+                    LOG.info( format(
+                            INTL.getString( "SUCCESS_LOG" ),
+                            added.getPosition(),
+                            added.getScoreAsString(),
+                            added.getWhenAsString() ) );
                     JOptionPane.showMessageDialog(
                             frame,
                             format(
@@ -266,11 +271,6 @@ public class Main {
                             added.getWhenAsString() ),
                             INTL.getString( "SUCCESS_MESSAGE" ),
                             JOptionPane.INFORMATION_MESSAGE );
-                    LOG.info( format(
-                            INTL.getString( "SUCCESS_LOG" ),
-                            added.getPosition(),
-                            added.getScoreAsString(),
-                            added.getWhenAsString() ) );
                 } );
 
         /* ... chronograph set */
