@@ -72,7 +72,6 @@ public class HallOfFameModel
 
     private final File baseDirectory;
     private final File scoreFile;
-    private OutputStreamWriter out;
     private final FilenameFilter filenameFilter;
 
     ArrayList<Score> scores = new ArrayList<>();
@@ -180,14 +179,6 @@ public class HallOfFameModel
                         ms.getCols(),
                         ms.getMinesToMark(),
                         WHO_AM_I ) );
-        try {
-            out = new FileWriter(scoreFile,true );
-        } catch ( IOException ex ) {
-            LOG.warning( () -> format(
-                    INTL.getString( "CANNOT_OPEN_SCORES_FILE" ),
-                    scoreFile,
-                    ex ) );
-        }
         filenameFilter = (d, n) -> Pattern.compile(
                 format(
                         SEARCH_SCORE_PATTERN,
@@ -313,18 +304,20 @@ public class HallOfFameModel
             }
             /* else nothing */
         }
-        try {
+        try (OutputStreamWriter out
+                = new FileWriter(scoreFile,true ))
+        {
             out.write(format(
                     SCORE_LINE_FORMAT,
                     new_score.getWho(),
                     new_score.getWhen(),
                     new_score.getScore(),
                     new_score.hashCode() ));
-            out.flush();
         } catch ( IOException ex ) {
             LOG.warning( () -> format(
                     INTL.getString(
                             "FORMAT_CANNOT_WRITE_SCORE" ),
+                    scoreFile,
                     ex ) );
         }
 
