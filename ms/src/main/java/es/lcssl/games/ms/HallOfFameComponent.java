@@ -29,7 +29,6 @@ import java.awt.BorderLayout;
 import java.io.File;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -47,37 +46,36 @@ import static java.text.MessageFormat.format;
  */
 public class HallOfFameComponent extends JFrame {
 
-    private static final Logger LOG
-            = Logger.getLogger( HallOfFameComponent.class.getName() );
+    private static final Logger LOG =
+            Logger.getLogger( HallOfFameComponent.class.getName() );
 
-    private static final ResourceBundle INTL
-            = ResourceBundle.getBundle( HallOfFameComponent.class.getName() );
+    private static final ResourceBundle INTL =
+            ResourceBundle.getBundle( HallOfFameComponent.class.getName() );
 
     protected final HallOfFameModel model;
-    protected final JList list;
+    protected final JList<HallOfFameModel.Score> list;
 
     public HallOfFameComponent( MineSweeper ms, File base_dir ) {
-        super( format( INTL.getString(
-                "HALL_OF_FAME_DIALOG_NAME" ),
+        super( format(
+                INTL.getString( "HALL_OF_FAME_DIALOG_NAME" ),
                 ms.getRows(),
                 ms.getCols(),
                 ms.getMinesToMark() ) );
         JPanel panel = new JPanel( new BorderLayout() );
-        JLabel label = new JLabel( format( INTL.getString(
-                "HALL_OF_FAME_DIALOG_HEADER" ),
+        JLabel label = new JLabel( format(
+                INTL.getString( "HALL_OF_FAME_DIALOG_HEADER" ),
                 ms.getRows(),
                 ms.getCols(),
                 ms.getMinesToMark() ) );
-        label.setAlignmentX( 0.5F);
+        label.setHorizontalAlignment( JLabel.CENTER );
         panel.add( label, BorderLayout.NORTH );
-        list = new JList<>( model = new HallOfFameModel(
-                ms, base_dir ) );
+        list = new JList<>(
+                model = new HallOfFameModel( ms, base_dir ) );
         list.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
         list.setDragEnabled( false );
-        //list.setEnabled( false );
         list.setBorder( BorderFactory.createBevelBorder(
                 BevelBorder.LOWERED ) );
-        JScrollPane scroll_pane = new JScrollPane(list );
+        JScrollPane scroll_pane = new JScrollPane( list );
         panel.add( scroll_pane, BorderLayout.CENTER );
         add( panel );
         pack();
@@ -87,7 +85,7 @@ public class HallOfFameComponent extends JFrame {
         return model;
     }
 
-    public JList getList() {
+    public JList<HallOfFameModel.Score> getList() {
         return list;
     }
 
